@@ -1,41 +1,48 @@
-@import './base.css';
-
 @import "tailwindcss";
 
 @theme {
   --color-primary: #4e36e2;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
-}
-
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+@layer base {
+  * {
+    box-sizing: border-box;
   }
-}
 
-@media (min-width: 1024px) {
+  html {
+    @apply bg-slate-100;
+  }
+
   body {
-    display: flex;
-    place-items: center;
+    @apply m-0 min-h-screen bg-white text-[15px] leading-relaxed text-slate-800 antialiased;
+    font-family:
+      Inter,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      Oxygen,
+      Ubuntu,
+      Cantarell,
+      'Fira Sans',
+      'Droid Sans',
+      'Helvetica Neue',
+      sans-serif;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    @apply min-h-screen font-normal;
+  }
+
+  a {
+    @apply text-inherit no-underline transition-opacity duration-200;
+  }
+
+  @media (hover: hover) {
+    a:hover {
+      @apply opacity-90;
+    }
   }
 }
