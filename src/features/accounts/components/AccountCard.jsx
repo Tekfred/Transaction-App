@@ -7,9 +7,15 @@ const toneClasses = {
   emerald: 'from-emerald-500 to-teal-400',
 }
 
-export default function AccountCard({ account }) {
+export default function AccountCard({ account, isSelected = false, onSelect }) {
   return (
-    <Card className="grid gap-5" padded="md">
+    <Card
+      className={cn(
+        'grid gap-5',
+        isSelected && 'border-[--color-primary] ring-2 ring-[--color-primary]/15',
+      )}
+      padded="md"
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -41,6 +47,19 @@ export default function AccountCard({ account }) {
           <p className="font-semibold text-emerald-700">{account.trend}</p>
         </div>
       </div>
+
+      <button
+        className={cn(
+          'w-full rounded-2xl border px-4 py-3 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[--color-primary]',
+          isSelected
+            ? 'border-[--color-primary] bg-[--color-primary] text-white'
+            : 'border-slate-900/8 bg-slate-50 text-slate-700 hover:bg-slate-100',
+        )}
+        onClick={() => onSelect?.(account.id)}
+        type="button"
+      >
+        {isSelected ? 'Selected account' : 'Use this account'}
+      </button>
     </Card>
   )
 }

@@ -1,8 +1,18 @@
+import { useAppState } from '../app/AppProvider.jsx'
 import { PageHeader, PageSection } from '../components/ui/index.js'
 import { TransferFormShell, TransferList } from '../features/transfers/components/index.js'
-import { transferDraft, transfers } from '../features/transfers/data/transfers.js'
+import { accounts } from '../features/accounts/data/accounts.js'
+import { transfers } from '../features/transfers/data/transfers.js'
 
 export default function Transfers() {
+  const {
+    closeTransferReview,
+    openTransferReview,
+    resetTransferDraft,
+    state,
+    updateTransferDraft,
+  } = useAppState()
+
   return (
     <PageSection className="gap-6">
       <PageHeader
@@ -12,7 +22,15 @@ export default function Transfers() {
       />
 
       <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
-        <TransferFormShell draft={transferDraft} />
+        <TransferFormShell
+          accounts={accounts}
+          draft={state.transferDraft}
+          isReviewOpen={state.isTransferReviewOpen}
+          onCloseReview={closeTransferReview}
+          onOpenReview={openTransferReview}
+          onReset={resetTransferDraft}
+          onUpdateDraft={updateTransferDraft}
+        />
         <TransferList transfers={transfers} />
       </div>
     </PageSection>

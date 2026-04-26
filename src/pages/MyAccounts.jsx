@@ -1,9 +1,12 @@
+import { useAppState } from '../app/AppProvider.jsx'
 import { PageHeader, PageSection } from '../components/ui/index.js'
 import { AccountList, AccountsSummary } from '../features/accounts/components/index.js'
 import { accounts } from '../features/accounts/data/accounts.js'
 import { accountsSummary } from '../features/accounts/data/summary.js'
 
 export default function MyAccounts() {
+  const { selectAccount, state } = useAppState()
+
   return (
     <PageSection className="gap-6">
       <PageHeader
@@ -14,7 +17,11 @@ export default function MyAccounts() {
 
       <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
         <AccountsSummary summary={accountsSummary} />
-        <AccountList accounts={accounts} />
+        <AccountList
+          accounts={accounts}
+          onSelectAccount={selectAccount}
+          selectedAccountId={state.selectedAccountId}
+        />
       </div>
     </PageSection>
   )
