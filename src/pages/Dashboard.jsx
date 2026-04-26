@@ -1,4 +1,14 @@
 import { Button, PageHeader, PageSection, StatCard } from '../components/ui/index.js'
+import { dashboardStats } from '../features/dashboard/data/summary.js'
+import { formatCurrency } from '../utils/formatters.js'
+
+function formatStatValue(stat) {
+  if (stat.format === 'currency') {
+    return formatCurrency(stat.value)
+  }
+
+  return stat.value
+}
 
 export default function Dashboard() {
   return (
@@ -11,21 +21,14 @@ export default function Dashboard() {
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard
-          description="Across your linked checking and savings accounts."
-          label="Total Balance"
-          value="$24,580.40"
-        />
-        <StatCard
-          description="Down 8% compared with last month."
-          label="Monthly Spending"
-          value="$3,240.18"
-        />
-        <StatCard
-          description="Two card payments and two scheduled transfers."
-          label="Pending Payments"
-          value="4"
-        />
+        {dashboardStats.map((stat) => (
+          <StatCard
+            description={stat.description}
+            key={stat.id}
+            label={stat.label}
+            value={formatStatValue(stat)}
+          />
+        ))}
       </div>
     </PageSection>
   )
