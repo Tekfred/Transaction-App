@@ -2,6 +2,11 @@
 
 @theme {
   --color-primary: #4e36e2;
+  --color-primary-strong: #3f2bc0;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f7f9fc;
+  --color-text-strong: #0f172a;
+  --color-text-muted: #64748b;
 }
 
 @layer base {
