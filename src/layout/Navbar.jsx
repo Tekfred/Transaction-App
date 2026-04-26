@@ -1,26 +1,8 @@
 import { NavLink } from 'react-router-dom'
 
+import { navigationItems } from '../app/navigation.js'
 import logo from '../assets/logo.svg'
 import profileImage from '../assets/profile_img_1.png'
-
-const navigation = [
-  {
-    name: 'Dashboard',
-    path: '/',
-  },
-  {
-    name: 'My Accounts',
-    path: '/my-accounts',
-  },
-  {
-    name: 'Payments',
-    path: '/payments',
-  },
-  {
-    name: 'Transfers',
-    path: '/transfers',
-  },
-]
 
 const navLinkClass = ({ isActive }) =>
   [
@@ -43,14 +25,12 @@ export default function Navbar({ title }) {
           <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.12em] text-slate-100">
             Finance Workspace
           </p>
-          <h1 className="m-0 text-[clamp(1.75rem,4vw,2.4rem)] font-bold text-white">
-            {title}
-          </h1>
+          <h1 className="m-0 text-[clamp(1.75rem,4vw,2.4rem)] font-bold text-white">{title}</h1>
         </div>
       </div>
 
       <nav className="flex flex-wrap items-center gap-2 sm:gap-3" aria-label="Primary">
-        {navigation.map((navigate) => (
+        {navigationItems.map((navigate) => (
           <NavLink
             className={navLinkClass}
             end={navigate.path === '/'}
