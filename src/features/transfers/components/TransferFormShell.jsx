@@ -1,4 +1,4 @@
-import { Button, Card } from '../../../components/ui/index.js'
+import { Button, Card, FormControl } from '../../../components/ui/index.js'
 import { formatCurrency } from '../../../utils/formatters.js'
 
 export default function TransferFormShell({
@@ -23,8 +23,8 @@ export default function TransferFormShell({
       <div className="grid gap-3">
         <label className="grid gap-2 rounded-2xl bg-white/10 p-4">
           <span className="text-xs font-bold uppercase tracking-widest text-slate-300">From</span>
-          <select
-            className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 font-semibold text-white outline-none focus:border-white/40"
+          <FormControl
+            as="select"
             onChange={(event) => onUpdateDraft('fromAccountId', event.target.value)}
             value={draft.fromAccountId}
           >
@@ -33,12 +33,12 @@ export default function TransferFormShell({
                 {account.name}
               </option>
             ))}
-          </select>
+          </FormControl>
         </label>
         <label className="grid gap-2 rounded-2xl bg-white/10 p-4">
           <span className="text-xs font-bold uppercase tracking-widest text-slate-300">To</span>
-          <select
-            className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 font-semibold text-white outline-none focus:border-white/40"
+          <FormControl
+            as="select"
             onChange={(event) => onUpdateDraft('toAccountId', event.target.value)}
             value={draft.toAccountId}
           >
@@ -47,12 +47,12 @@ export default function TransferFormShell({
                 {account.name}
               </option>
             ))}
-          </select>
+          </FormControl>
         </label>
         <label className="grid gap-2 rounded-2xl bg-white/10 p-4">
           <span className="text-xs font-bold uppercase tracking-widest text-slate-300">Amount</span>
-          <input
-            className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-3xl font-bold text-white outline-none focus:border-white/40"
+          <FormControl
+            className="text-2xl font-bold sm:text-3xl"
             min="1"
             onChange={(event) => onUpdateDraft('amount', Number(event.target.value))}
             type="number"
@@ -64,20 +64,19 @@ export default function TransferFormShell({
       <div className="grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-2 lg:grid-cols-1">
         <label className="grid gap-2">
           <span className="text-sm text-slate-300">Frequency</span>
-          <select
-            className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 font-semibold text-white outline-none focus:border-white/40"
+          <FormControl
+            as="select"
             onChange={(event) => onUpdateDraft('frequency', event.target.value)}
             value={draft.frequency}
           >
             <option>One-time</option>
             <option>Weekly</option>
             <option>Monthly</option>
-          </select>
+          </FormControl>
         </label>
         <label className="grid gap-2">
           <span className="text-sm text-slate-300">Memo</span>
-          <input
-            className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2 font-semibold text-white outline-none focus:border-white/40"
+          <FormControl
             onChange={(event) => onUpdateDraft('memo', event.target.value)}
             type="text"
             value={draft.memo}

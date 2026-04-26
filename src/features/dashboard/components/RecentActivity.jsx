@@ -15,7 +15,7 @@ export default function RecentActivity({ transactions }) {
 
           return (
             <div
-              className="grid grid-cols-[1fr_auto] gap-3 py-4 first:pt-0 last:pb-0"
+              className="grid gap-2 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_auto] sm:gap-3"
               key={transaction.id}
             >
               <div className="min-w-0">
@@ -30,8 +30,8 @@ export default function RecentActivity({ transactions }) {
               <strong
                 className={
                   isCredit
-                    ? 'text-right font-semibold text-emerald-700'
-                    : 'text-right font-semibold text-slate-900'
+                    ? 'font-semibold text-emerald-700 sm:text-right'
+                    : 'font-semibold text-slate-900 sm:text-right'
                 }
               >
                 {isCredit ? '+' : ''}

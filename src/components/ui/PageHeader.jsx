@@ -12,7 +12,7 @@ export default function PageHeader({ action, eyebrow, subtitle, title }) {
         <h2 className="m-0 text-3xl font-bold text-slate-900">{title}</h2>
         {subtitle ? <p className="text-slate-500">{subtitle}</p> : null}
       </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {action ? <div className="grid shrink-0 sm:block">{action}</div> : null}
     </Card>
   )
 }

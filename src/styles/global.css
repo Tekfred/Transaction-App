@@ -16,6 +16,7 @@
 
   html {
     @apply bg-slate-100;
+    color-scheme: light;
   }
 
   body {
@@ -43,6 +44,28 @@
 
   a {
     @apply text-inherit no-underline transition-opacity duration-200;
+  }
+
+  ::selection {
+    @apply bg-[--color-primary] text-white;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   @media (hover: hover) {

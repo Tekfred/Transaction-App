@@ -7,7 +7,7 @@ export default function BalanceSummary({ summary }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-300">Total balance</p>
-          <strong className="mt-1 block text-4xl font-bold tracking-normal sm:text-5xl">
+          <strong className="mt-1 block break-words text-4xl font-bold tracking-normal sm:text-5xl">
             {formatCurrency(summary.totalBalance, summary.currency)}
           </strong>
         </div>

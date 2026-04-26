@@ -12,7 +12,7 @@ export default function TransferCard({ transfer }) {
           </div>
           <p className="text-slate-500">{transfer.description}</p>
         </div>
-        <strong className="text-2xl font-bold text-slate-950">
+        <strong className="break-words text-2xl font-bold text-slate-950">
           {formatCurrency(transfer.amount, transfer.currency)}
         </strong>
       </div>

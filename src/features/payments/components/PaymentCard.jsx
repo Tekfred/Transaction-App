@@ -12,7 +12,7 @@ export default function PaymentCard({ payment }) {
           </div>
           <p className="text-slate-500">{payment.category}</p>
         </div>
-        <strong className="text-2xl font-bold text-slate-950">
+        <strong className="break-words text-2xl font-bold text-slate-950">
           {formatCurrency(payment.amount, payment.currency)}
         </strong>
       </div>

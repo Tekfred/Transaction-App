@@ -14,7 +14,7 @@ export default function AccountBalance({
   return (
     <div>
       <p className={`text-sm font-semibold ${labelClass}`}>{label}</p>
-      <strong className={`${valueClass} block ${valueColorClass}`}>
+      <strong className={`${valueClass} block break-words ${valueColorClass}`}>
         {formatCurrency(amount, currency)}
       </strong>
     </div>
