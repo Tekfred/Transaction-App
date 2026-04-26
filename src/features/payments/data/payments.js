@@ -6,6 +6,9 @@ export const payments = [
     amount: 132.42,
     currency: 'USD',
     status: 'scheduled',
+    category: 'Utilities',
+    sourceAccountId: 'checking-main',
+    autopay: true,
   },
   {
     id: 'pay-internet',
@@ -14,6 +17,9 @@ export const payments = [
     amount: 89.99,
     currency: 'USD',
     status: 'scheduled',
+    category: 'Utilities',
+    sourceAccountId: 'checking-main',
+    autopay: true,
   },
   {
     id: 'pay-card',
@@ -22,5 +28,8 @@ export const payments = [
     amount: 742.18,
     currency: 'USD',
     status: 'pending',
+    category: 'Credit',
+    sourceAccountId: 'checking-main',
+    autopay: false,
   },
 ]
