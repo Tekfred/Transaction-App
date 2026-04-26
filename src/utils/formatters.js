@@ -11,11 +11,3 @@ export function formatCompactDate(date) {
     day: 'numeric',
   }).format(new Date(date))
 }
-
-export function formatLongDate(date) {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(date))
-}

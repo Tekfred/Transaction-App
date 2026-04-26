@@ -1,10 +1,14 @@
 import profileImage from '../assets/profile_img_1.png'
-import { Card, PageSection, SectionTitle } from '../components/ui/index.js'
+import { Card, PageHeader, PageSection } from '../components/ui/index.js'
 
 export default function Profile() {
   return (
-    <PageSection>
-      <SectionTitle>Profile</SectionTitle>
+    <PageSection className="gap-6">
+      <PageHeader
+        eyebrow="Profile"
+        subtitle="Manage the visible account holder details for this workspace."
+        title="Profile"
+      />
       <Card className="flex flex-col gap-5 sm:flex-row sm:items-center" padded="md">
         <img
           alt="Cony profile"

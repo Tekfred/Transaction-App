@@ -33,3 +33,5 @@ npm run build
 ```sh
 npm run test:unit
 ```
+
+The project does not have test files yet, so the test command is configured to pass with an empty suite until tests are added.
