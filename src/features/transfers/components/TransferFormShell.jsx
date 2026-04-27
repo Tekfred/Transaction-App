@@ -4,11 +4,15 @@ import { formatCurrency } from '../../../utils/formatters.js'
 export default function TransferFormShell({
   accounts,
   draft,
+  error,
   isReviewOpen,
+  isSubmitting,
   onCloseReview,
   onOpenReview,
   onReset,
+  onSubmit,
   onUpdateDraft,
+  receipt,
 }) {
   const selectedFromAccount = accounts.find((account) => account.id === draft.fromAccountId)
   const selectedToAccount = accounts.find((account) => account.id === draft.toAccountId)
@@ -94,21 +98,51 @@ export default function TransferFormShell({
             {selectedToAccount?.name}
           </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-            <Button className="w-full" variant="secondary">
-              Confirm Transfer
+            <Button
+              className="w-full"
+              disabled={isSubmitting}
+              onClick={onSubmit}
+              variant="secondary"
+            >
+              {isSubmitting ? 'Sending...' : 'Confirm Transfer'}
             </Button>
-            <Button className="w-full" onClick={onCloseReview} variant="secondary">
+            <Button
+              className="w-full"
+              disabled={isSubmitting}
+              onClick={onCloseReview}
+              variant="secondary"
+            >
               Keep Editing
             </Button>
           </div>
         </div>
       ) : null}
 
+      {error ? (
+        <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {error}
+        </p>
+      ) : null}
+
+      {receipt ? (
+        <div className="grid gap-2 rounded-2xl bg-emerald-50 p-4 text-emerald-800">
+          <p className="text-xs font-bold uppercase tracking-widest">Transfer sent</p>
+          <p className="font-semibold">
+            Reference {receipt.reference || receipt.id} · {receipt.statusLabel || receipt.status}
+          </p>
+        </div>
+      ) : null}
+
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-        <Button className="w-full" onClick={onOpenReview} variant="secondary">
+        <Button
+          className="w-full"
+          disabled={isSubmitting}
+          onClick={onOpenReview}
+          variant="secondary"
+        >
           Review Transfer
         </Button>
-        <Button className="w-full" onClick={onReset} variant="secondary">
+        <Button className="w-full" disabled={isSubmitting} onClick={onReset} variant="secondary">
           Reset Draft
         </Button>
       </div>

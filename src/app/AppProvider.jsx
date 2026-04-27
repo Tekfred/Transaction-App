@@ -9,6 +9,7 @@ import { toTransactionViewModels } from '../features/transactions/data/adapters.
 import { transferDraft as defaultTransferDraft } from '../features/transfers/data/transfers.js'
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../lib/api/auth.js'
 import { getTransactions as getTransactionsRequest } from '../lib/api/transactions.js'
+import { createTransfer as createTransferRequest } from '../lib/api/transfers.js'
 import { clearStoredAuth, loadStoredAuth, storeAuth } from './authStorage.js'
 
 const AppStateContext = createContext(null)
@@ -23,6 +24,7 @@ const initialState = {
   isAuthLoading: true,
   isAuthenticated: false,
   isTransactionsLoading: false,
+  isTransferSubmitting: false,
   isUsingMockAccounts: true,
   isUsingMockTransactions: true,
   isTransferReviewOpen: false,
@@ -30,7 +32,9 @@ const initialState = {
   selectedAccountId: mockAccounts[0]?.id ?? null,
   transactions: mockTransactions,
   transactionsError: null,
+  transferError: null,
   transferDraft: defaultTransferDraft,
+  transferReceipt: null,
   user: null,
 }
 
@@ -96,6 +100,7 @@ function appReducer(state, action) {
           ...state.transferDraft,
           [action.field]: action.value,
         },
+        transferError: null,
       }
     case 'transactions/loadStart':
       return {
@@ -123,6 +128,7 @@ function appReducer(state, action) {
       return {
         ...state,
         isTransferReviewOpen: true,
+        transferError: null,
       }
     case 'transfer/closeReview':
       return {
@@ -132,8 +138,35 @@ function appReducer(state, action) {
     case 'transfer/resetDraft':
       return {
         ...state,
-        transferDraft: defaultTransferDraft,
+        transferDraft: {
+          ...defaultTransferDraft,
+          fromAccountId: state.accounts[0]?.id ?? defaultTransferDraft.fromAccountId,
+          toAccountId:
+            state.accounts[1]?.id ?? state.accounts[0]?.id ?? defaultTransferDraft.toAccountId,
+        },
+        transferError: null,
+        transferReceipt: null,
         isTransferReviewOpen: false,
+      }
+    case 'transfer/submitStart':
+      return {
+        ...state,
+        isTransferSubmitting: true,
+        transferError: null,
+      }
+    case 'transfer/submitSuccess':
+      return {
+        ...state,
+        isTransferReviewOpen: false,
+        isTransferSubmitting: false,
+        transferError: null,
+        transferReceipt: action.receipt,
+      }
+    case 'transfer/submitFailure':
+      return {
+        ...state,
+        isTransferSubmitting: false,
+        transferError: action.message,
       }
     case 'auth/restoreStart':
     case 'auth/loginStart':
@@ -174,13 +207,17 @@ function appReducer(state, action) {
         isAuthLoading: false,
         isAuthenticated: false,
         isTransactionsLoading: false,
+        isTransferReviewOpen: false,
+        isTransferSubmitting: false,
         isUsingMockAccounts: true,
         isUsingMockTransactions: true,
         refreshToken: null,
         selectedAccountId: mockAccounts[0]?.id ?? null,
         transactions: mockTransactions,
         transactionsError: null,
+        transferError: null,
         user: null,
+        transferReceipt: null,
       }
     default:
       return state
@@ -275,6 +312,108 @@ export function AppProvider({ children }) {
     }
   }, [state.accessToken, state.refreshToken])
 
+  const refreshAccounts = useCallback(async (accessToken) => {
+    const [apiAccounts, apiSummary] = await Promise.all([
+      getAccountsRequest(accessToken),
+      getAccountsSummary(accessToken),
+    ])
+    const accounts = toAccountViewModels(apiAccounts)
+
+    dispatch({
+      type: 'accounts/loadSuccess',
+      accounts,
+      summary: {
+        activeAccounts: apiSummary.accounts.filter((account) => account.isActive).length,
+        currency: accounts[0]?.currency ?? 'USD',
+        totalAvailable: apiSummary.totalBalance,
+        totalBalance: apiSummary.totalBalance,
+      },
+    })
+
+    return accounts
+  }, [])
+
+  const refreshTransactions = useCallback(async (accessToken) => {
+    const apiTransactions = await getTransactionsRequest(accessToken)
+    const transactions = toTransactionViewModels(apiTransactions)
+
+    dispatch({
+      type: 'transactions/loadSuccess',
+      transactions,
+    })
+
+    return transactions
+  }, [])
+
+  const submitTransfer = useCallback(async () => {
+    if (!state.accessToken) {
+      dispatch({
+        type: 'transfer/submitFailure',
+        message: 'You need to sign in before creating a transfer.',
+      })
+      return null
+    }
+
+    const senderAccount = state.accounts.find(
+      (account) => account.id === state.transferDraft.fromAccountId,
+    )
+    const receiverAccount = state.accounts.find(
+      (account) => account.id === state.transferDraft.toAccountId,
+    )
+
+    if (!senderAccount || !receiverAccount) {
+      dispatch({
+        type: 'transfer/submitFailure',
+        message: 'Choose valid sender and receiver accounts.',
+      })
+      return null
+    }
+
+    if (senderAccount.id === receiverAccount.id) {
+      dispatch({
+        type: 'transfer/submitFailure',
+        message: 'Sender and receiver accounts must be different.',
+      })
+      return null
+    }
+
+    if (!Number.isFinite(state.transferDraft.amount) || state.transferDraft.amount <= 0) {
+      dispatch({
+        type: 'transfer/submitFailure',
+        message: 'Enter a transfer amount greater than zero.',
+      })
+      return null
+    }
+
+    dispatch({ type: 'transfer/submitStart' })
+
+    try {
+      const receipt = await createTransferRequest(state.accessToken, {
+        amount: state.transferDraft.amount,
+        narration: state.transferDraft.memo || 'Transfer',
+        receiverAccountNumber: receiverAccount.accountNumber,
+        senderAccountId: senderAccount.id,
+      })
+
+      dispatch({ type: 'transfer/submitSuccess', receipt })
+
+      Promise.all([
+        refreshAccounts(state.accessToken),
+        refreshTransactions(state.accessToken),
+      ]).catch(() => {
+        // The receipt remains valid even if the follow-up refresh fails.
+      })
+
+      return receipt
+    } catch (error) {
+      dispatch({
+        type: 'transfer/submitFailure',
+        message: error.message || 'Unable to complete transfer.',
+      })
+      return null
+    }
+  }, [refreshAccounts, refreshTransactions, state.accessToken, state.accounts, state.transferDraft])
+
   useEffect(() => {
     if (!state.isAuthenticated || !state.accessToken) {
       return
@@ -284,24 +423,11 @@ export function AppProvider({ children }) {
 
     dispatch({ type: 'accounts/loadStart' })
 
-    Promise.all([getAccountsRequest(state.accessToken), getAccountsSummary(state.accessToken)])
-      .then(([apiAccounts, apiSummary]) => {
+    refreshAccounts(state.accessToken)
+      .then(() => {
         if (!isActive) {
           return
         }
-
-        const accounts = toAccountViewModels(apiAccounts)
-
-        dispatch({
-          type: 'accounts/loadSuccess',
-          accounts,
-          summary: {
-            activeAccounts: apiSummary.accounts.filter((account) => account.isActive).length,
-            currency: accounts[0]?.currency ?? 'USD',
-            totalAvailable: apiSummary.totalBalance,
-            totalBalance: apiSummary.totalBalance,
-          },
-        })
       })
       .catch((error) => {
         if (!isActive) {
@@ -317,7 +443,7 @@ export function AppProvider({ children }) {
     return () => {
       isActive = false
     }
-  }, [state.accessToken, state.isAuthenticated])
+  }, [refreshAccounts, state.accessToken, state.isAuthenticated])
 
   useEffect(() => {
     if (!state.isAuthenticated || !state.accessToken) {
@@ -328,16 +454,11 @@ export function AppProvider({ children }) {
 
     dispatch({ type: 'transactions/loadStart' })
 
-    getTransactionsRequest(state.accessToken)
-      .then((apiTransactions) => {
+    refreshTransactions(state.accessToken)
+      .then(() => {
         if (!isActive) {
           return
         }
-
-        dispatch({
-          type: 'transactions/loadSuccess',
-          transactions: toTransactionViewModels(apiTransactions),
-        })
       })
       .catch((error) => {
         if (!isActive) {
@@ -353,7 +474,7 @@ export function AppProvider({ children }) {
     return () => {
       isActive = false
     }
-  }, [state.accessToken, state.isAuthenticated])
+  }, [refreshTransactions, state.accessToken, state.isAuthenticated])
 
   const value = useMemo(
     () => ({
@@ -364,10 +485,11 @@ export function AppProvider({ children }) {
       resetTransferDraft: () => dispatch({ type: 'transfer/resetDraft' }),
       selectAccount: (accountId) => dispatch({ type: 'account/select', accountId }),
       state,
+      submitTransfer,
       updateTransferDraft: (field, value) =>
         dispatch({ type: 'transfer/updateDraft', field, value }),
     }),
-    [login, logout, state],
+    [login, logout, state, submitTransfer],
   )
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>

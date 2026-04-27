@@ -9,6 +9,7 @@ export default function Transfers() {
     openTransferReview,
     resetTransferDraft,
     state,
+    submitTransfer,
     updateTransferDraft,
   } = useAppState()
 
@@ -24,11 +25,15 @@ export default function Transfers() {
         <TransferFormShell
           accounts={state.accounts}
           draft={state.transferDraft}
+          error={state.transferError}
           isReviewOpen={state.isTransferReviewOpen}
+          isSubmitting={state.isTransferSubmitting}
           onCloseReview={closeTransferReview}
           onOpenReview={openTransferReview}
           onReset={resetTransferDraft}
+          onSubmit={submitTransfer}
           onUpdateDraft={updateTransferDraft}
+          receipt={state.transferReceipt}
         />
         <TransferList transfers={transfers} />
       </div>

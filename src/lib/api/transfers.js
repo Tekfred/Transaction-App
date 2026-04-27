@@ -5,7 +5,7 @@ export async function createTransfer(accessToken, transfer) {
   const response = await apiRequest('/api/transactions/transfers/', {
     accessToken,
     body: {
-      amount: transfer.amount,
+      amount: String(transfer.amount),
       narration: transfer.narration,
       receiver_account_number: transfer.receiverAccountNumber,
       sender_account_id: transfer.senderAccountId,
