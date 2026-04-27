@@ -1,4 +1,5 @@
 import Dashboard from '../pages/Dashboard.jsx'
+import Deposits from '../pages/Deposits.jsx'
 import MyAccounts from '../pages/MyAccounts.jsx'
 import Payments from '../pages/Payments.jsx'
 import Profile from '../pages/Profile.jsx'
@@ -24,6 +25,11 @@ export const appRoutes = [
     id: 'transfers',
     path: 'transfers',
     element: <Transfers />,
+  },
+  {
+    id: 'deposits',
+    path: 'deposits',
+    element: <Deposits />,
   },
   {
     id: 'profile',

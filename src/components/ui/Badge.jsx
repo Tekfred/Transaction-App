@@ -2,6 +2,7 @@ import { cn } from '../../utils/cn.js'
 
 const variants = {
   active: 'bg-emerald-50 text-emerald-700 ring-emerald-600/15',
+  inactive: 'bg-slate-100 text-slate-600 ring-slate-600/10',
   pending: 'bg-amber-50 text-amber-700 ring-amber-600/15',
   posted: 'bg-slate-100 text-slate-700 ring-slate-600/10',
   scheduled: 'bg-blue-50 text-blue-700 ring-blue-600/15',
