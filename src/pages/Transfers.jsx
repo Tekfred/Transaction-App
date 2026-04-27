@@ -1,7 +1,6 @@
 import { useAppState } from '../app/AppProvider.jsx'
 import { PageHeader, PageSection } from '../components/ui/index.js'
 import { TransferFormShell, TransferList } from '../features/transfers/components/index.js'
-import { accounts } from '../features/accounts/data/accounts.js'
 import { transfers } from '../features/transfers/data/transfers.js'
 
 export default function Transfers() {
@@ -23,7 +22,7 @@ export default function Transfers() {
 
       <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
         <TransferFormShell
-          accounts={accounts}
+          accounts={state.accounts}
           draft={state.transferDraft}
           isReviewOpen={state.isTransferReviewOpen}
           onCloseReview={closeTransferReview}
