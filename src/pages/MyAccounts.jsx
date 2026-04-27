@@ -17,6 +17,13 @@ export default function MyAccounts() {
         title="My Accounts"
       />
 
+      {state.isAccountsLoading ? (
+        <Card className="bg-blue-50 text-blue-800" padded="md">
+          <p className="font-semibold">Refreshing accounts</p>
+          <p className="text-sm">Fetching the latest account balances from the API.</p>
+        </Card>
+      ) : null}
+
       {state.accountsError ? (
         <Card className="bg-amber-50 text-amber-800" padded="md">
           <p className="font-semibold">Using sample accounts</p>

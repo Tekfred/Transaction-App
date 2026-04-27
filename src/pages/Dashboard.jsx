@@ -34,6 +34,13 @@ export default function Dashboard() {
         title="Dashboard"
       />
 
+      {state.isAccountsLoading || state.isTransactionsLoading ? (
+        <Card className="bg-blue-50 text-blue-800" padded="md">
+          <p className="font-semibold">Refreshing dashboard data</p>
+          <p className="text-sm">Balances and recent activity are being updated.</p>
+        </Card>
+      ) : null}
+
       {state.transactionsError ? (
         <Card className="bg-amber-50 text-amber-800" padded="md">
           <p className="font-semibold">Using sample transaction activity</p>

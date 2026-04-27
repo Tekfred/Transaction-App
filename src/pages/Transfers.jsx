@@ -1,5 +1,5 @@
 import { useAppState } from '../app/AppProvider.jsx'
-import { PageHeader, PageSection } from '../components/ui/index.js'
+import { Card, PageHeader, PageSection } from '../components/ui/index.js'
 import { TransferFormShell, TransferList } from '../features/transfers/components/index.js'
 import { transfers } from '../features/transfers/data/transfers.js'
 
@@ -20,6 +20,13 @@ export default function Transfers() {
         subtitle="Prepare new transfers and review scheduled movement between accounts."
         title="Transfers"
       />
+
+      {state.isAccountsLoading ? (
+        <Card className="bg-blue-50 text-blue-800" padded="md">
+          <p className="font-semibold">Refreshing transfer accounts</p>
+          <p className="text-sm">Account options are being updated from the API.</p>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
         <TransferFormShell

@@ -8,7 +8,12 @@ import { depositDraft as defaultDepositDraft } from '../features/deposits/data/d
 import { transactions as mockTransactions } from '../features/transactions/data/transactions.js'
 import { toTransactionViewModels } from '../features/transactions/data/adapters.js'
 import { transferDraft as defaultTransferDraft } from '../features/transfers/data/transfers.js'
-import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../lib/api/auth.js'
+import {
+  getCurrentUser,
+  login as loginRequest,
+  logout as logoutRequest,
+  refreshAccessToken,
+} from '../lib/api/auth.js'
 import { initiateDeposit as initiateDepositRequest } from '../lib/api/deposits.js'
 import {
   getTransactionReceipt,
@@ -279,6 +284,11 @@ function appReducer(state, action) {
         refreshToken: action.refreshToken,
         user: action.user,
       }
+    case 'auth/tokenRefreshSuccess':
+      return {
+        ...state,
+        accessToken: action.accessToken,
+      }
     case 'auth/failure':
       return {
         ...state,
@@ -343,27 +353,47 @@ export function AppProvider({ children }) {
 
     dispatch({ type: 'auth/restoreStart' })
 
-    getCurrentUser(storedAuth.accessToken)
-      .then((user) => {
+    async function restoreSession() {
+      try {
+        let accessToken = storedAuth.accessToken
+        let user
+
+        try {
+          user = await getCurrentUser(accessToken)
+        } catch (error) {
+          if (error.status !== 401 || !storedAuth.refreshToken) {
+            throw error
+          }
+
+          accessToken = await refreshAccessToken(storedAuth.refreshToken)
+          storeAuth({
+            accessToken,
+            refreshToken: storedAuth.refreshToken,
+          })
+          user = await getCurrentUser(accessToken)
+        }
+
         if (!isActive) {
           return
         }
 
         dispatch({
           type: 'auth/success',
-          accessToken: storedAuth.accessToken,
+          accessToken,
           refreshToken: storedAuth.refreshToken,
           user,
         })
-      })
-      .catch(() => {
+      } catch {
         if (!isActive) {
           return
         }
 
         clearStoredAuth()
         dispatch({ type: 'auth/logout' })
-      })
+      }
+    }
+
+    restoreSession()
 
     return () => {
       isActive = false
@@ -415,6 +445,39 @@ export function AppProvider({ children }) {
       }
     }
   }, [state.accessToken, state.refreshToken])
+
+  const runAuthorizedRequest = useCallback(
+    async (request) => {
+      if (!state.accessToken) {
+        throw new Error('You need to sign in before making this request.')
+      }
+
+      try {
+        return await request(state.accessToken)
+      } catch (error) {
+        if (error.status !== 401 || !state.refreshToken) {
+          throw error
+        }
+
+        try {
+          const accessToken = await refreshAccessToken(state.refreshToken)
+
+          storeAuth({
+            accessToken,
+            refreshToken: state.refreshToken,
+          })
+          dispatch({ type: 'auth/tokenRefreshSuccess', accessToken })
+
+          return await request(accessToken)
+        } catch {
+          clearStoredAuth()
+          dispatch({ type: 'auth/logout' })
+          throw new Error('Your session expired. Please sign in again.')
+        }
+      }
+    },
+    [state.accessToken, state.refreshToken],
+  )
 
   const refreshAccounts = useCallback(async (accessToken) => {
     const [apiAccounts, apiSummary] = await Promise.all([
@@ -492,18 +555,20 @@ export function AppProvider({ children }) {
     dispatch({ type: 'transfer/submitStart' })
 
     try {
-      const receipt = await createTransferRequest(state.accessToken, {
-        amount: state.transferDraft.amount,
-        narration: state.transferDraft.memo || 'Transfer',
-        receiverAccountNumber: receiverAccount.accountNumber,
-        senderAccountId: senderAccount.id,
-      })
+      const receipt = await runAuthorizedRequest((accessToken) =>
+        createTransferRequest(accessToken, {
+          amount: state.transferDraft.amount,
+          narration: state.transferDraft.memo || 'Transfer',
+          receiverAccountNumber: receiverAccount.accountNumber,
+          senderAccountId: senderAccount.id,
+        }),
+      )
 
       dispatch({ type: 'transfer/submitSuccess', receipt })
 
       Promise.all([
-        refreshAccounts(state.accessToken),
-        refreshTransactions(state.accessToken),
+        runAuthorizedRequest(refreshAccounts),
+        runAuthorizedRequest(refreshTransactions),
       ]).catch(() => {
         // The receipt remains valid even if the follow-up refresh fails.
       })
@@ -516,7 +581,14 @@ export function AppProvider({ children }) {
       })
       return null
     }
-  }, [refreshAccounts, refreshTransactions, state.accessToken, state.accounts, state.transferDraft])
+  }, [
+    refreshAccounts,
+    refreshTransactions,
+    runAuthorizedRequest,
+    state.accessToken,
+    state.accounts,
+    state.transferDraft,
+  ])
 
   const updateDepositDraft = useCallback((field, value) => {
     dispatch({ type: 'deposit/updateDraft', field, value })
@@ -558,10 +630,12 @@ export function AppProvider({ children }) {
     dispatch({ type: 'deposit/submitStart' })
 
     try {
-      const checkout = await initiateDepositRequest(state.accessToken, {
-        accountId: destinationAccount.id,
-        amount: state.depositDraft.amount,
-      })
+      const checkout = await runAuthorizedRequest((accessToken) =>
+        initiateDepositRequest(accessToken, {
+          accountId: destinationAccount.id,
+          amount: state.depositDraft.amount,
+        }),
+      )
 
       if (!checkout.checkoutUrl) {
         throw new Error('Checkout URL was not returned by the server.')
@@ -576,7 +650,7 @@ export function AppProvider({ children }) {
       })
       return null
     }
-  }, [state.accessToken, state.accounts, state.depositDraft])
+  }, [runAuthorizedRequest, state.accessToken, state.accounts, state.depositDraft])
 
   const viewTransactionReceipt = useCallback(
     async (transactionId) => {
@@ -591,7 +665,9 @@ export function AppProvider({ children }) {
       dispatch({ type: 'receipt/loadStart' })
 
       try {
-        const receipt = await getTransactionReceipt(state.accessToken, transactionId)
+        const receipt = await runAuthorizedRequest((accessToken) =>
+          getTransactionReceipt(accessToken, transactionId),
+        )
         dispatch({ type: 'receipt/loadSuccess', receipt })
         return receipt
       } catch (error) {
@@ -602,7 +678,7 @@ export function AppProvider({ children }) {
         return null
       }
     },
-    [state.accessToken],
+    [runAuthorizedRequest, state.accessToken],
   )
 
   const downloadTransactionReceipt = useCallback(
@@ -618,7 +694,9 @@ export function AppProvider({ children }) {
       dispatch({ type: 'receipt/downloadStart' })
 
       try {
-        const blob = await getTransactionReceiptPdf(state.accessToken, transactionId)
+        const blob = await runAuthorizedRequest((accessToken) =>
+          getTransactionReceiptPdf(accessToken, transactionId),
+        )
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
 
@@ -637,7 +715,7 @@ export function AppProvider({ children }) {
         })
       }
     },
-    [state.accessToken],
+    [runAuthorizedRequest, state.accessToken],
   )
 
   useEffect(() => {
@@ -649,7 +727,7 @@ export function AppProvider({ children }) {
 
     dispatch({ type: 'accounts/loadStart' })
 
-    refreshAccounts(state.accessToken)
+    runAuthorizedRequest(refreshAccounts)
       .then(() => {
         if (!isActive) {
           return
@@ -669,7 +747,7 @@ export function AppProvider({ children }) {
     return () => {
       isActive = false
     }
-  }, [refreshAccounts, state.accessToken, state.isAuthenticated])
+  }, [refreshAccounts, runAuthorizedRequest, state.accessToken, state.isAuthenticated])
 
   useEffect(() => {
     if (!state.isAuthenticated || !state.accessToken) {
@@ -680,7 +758,7 @@ export function AppProvider({ children }) {
 
     dispatch({ type: 'transactions/loadStart' })
 
-    refreshTransactions(state.accessToken)
+    runAuthorizedRequest(refreshTransactions)
       .then(() => {
         if (!isActive) {
           return
@@ -700,7 +778,7 @@ export function AppProvider({ children }) {
     return () => {
       isActive = false
     }
-  }, [refreshTransactions, state.accessToken, state.isAuthenticated])
+  }, [refreshTransactions, runAuthorizedRequest, state.accessToken, state.isAuthenticated])
 
   const value = useMemo(
     () => ({

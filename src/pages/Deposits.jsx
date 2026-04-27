@@ -13,6 +13,13 @@ export default function Deposits() {
         title="Deposits"
       />
 
+      {state.isAccountsLoading ? (
+        <Card className="bg-blue-50 text-blue-800" padded="md">
+          <p className="font-semibold">Refreshing deposit accounts</p>
+          <p className="text-sm">Account options are being updated from the API.</p>
+        </Card>
+      ) : null}
+
       {state.isUsingMockAccounts ? (
         <Card className="bg-amber-50 text-amber-800" padded="md">
           <p className="font-semibold">Sample account data is active</p>
