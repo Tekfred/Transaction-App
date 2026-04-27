@@ -4,10 +4,12 @@ import { getAccounts as getAccountsRequest, getAccountsSummary } from '../lib/ap
 import { accounts as mockAccounts } from '../features/accounts/data/accounts.js'
 import { toAccountViewModels } from '../features/accounts/data/adapters.js'
 import { createAccountsSummary } from '../features/accounts/data/summary.js'
+import { depositDraft as defaultDepositDraft } from '../features/deposits/data/depositDraft.js'
 import { transactions as mockTransactions } from '../features/transactions/data/transactions.js'
 import { toTransactionViewModels } from '../features/transactions/data/adapters.js'
 import { transferDraft as defaultTransferDraft } from '../features/transfers/data/transfers.js'
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../lib/api/auth.js'
+import { initiateDeposit as initiateDepositRequest } from '../lib/api/deposits.js'
 import { getTransactions as getTransactionsRequest } from '../lib/api/transactions.js'
 import { createTransfer as createTransferRequest } from '../lib/api/transfers.js'
 import { clearStoredAuth, loadStoredAuth, storeAuth } from './authStorage.js'
@@ -20,8 +22,14 @@ const initialState = {
   accountsError: null,
   accountsSummary: createAccountsSummary(mockAccounts),
   authError: null,
+  depositDraft: {
+    ...defaultDepositDraft,
+    accountId: mockAccounts[0]?.id ?? null,
+  },
+  depositError: null,
   isAccountsLoading: false,
   isAuthLoading: true,
+  isDepositSubmitting: false,
   isAuthenticated: false,
   isTransactionsLoading: false,
   isTransferSubmitting: false,
@@ -81,6 +89,12 @@ function appReducer(state, action) {
             : fallbackFromAccountId,
           toAccountId: draftToExists ? state.transferDraft.toAccountId : fallbackToAccountId,
         },
+        depositDraft: {
+          ...state.depositDraft,
+          accountId: action.accounts.some((account) => account.id === state.depositDraft.accountId)
+            ? state.depositDraft.accountId
+            : fallbackFromAccountId,
+        },
       }
     }
     case 'accounts/loadFailure':
@@ -101,6 +115,36 @@ function appReducer(state, action) {
           [action.field]: action.value,
         },
         transferError: null,
+      }
+    case 'deposit/updateDraft':
+      return {
+        ...state,
+        depositDraft: {
+          ...state.depositDraft,
+          [action.field]: action.value,
+        },
+        depositError: null,
+      }
+    case 'deposit/resetDraft':
+      return {
+        ...state,
+        depositDraft: {
+          ...defaultDepositDraft,
+          accountId: state.accounts[0]?.id ?? defaultDepositDraft.accountId,
+        },
+        depositError: null,
+      }
+    case 'deposit/submitStart':
+      return {
+        ...state,
+        depositError: null,
+        isDepositSubmitting: true,
+      }
+    case 'deposit/submitFailure':
+      return {
+        ...state,
+        depositError: action.message,
+        isDepositSubmitting: false,
       }
     case 'transactions/loadStart':
       return {
@@ -203,8 +247,14 @@ function appReducer(state, action) {
         accountsError: null,
         accountsSummary: createAccountsSummary(mockAccounts),
         authError: null,
+        depositDraft: {
+          ...defaultDepositDraft,
+          accountId: mockAccounts[0]?.id ?? null,
+        },
+        depositError: null,
         isAccountsLoading: false,
         isAuthLoading: false,
+        isDepositSubmitting: false,
         isAuthenticated: false,
         isTransactionsLoading: false,
         isTransferReviewOpen: false,
@@ -414,6 +464,66 @@ export function AppProvider({ children }) {
     }
   }, [refreshAccounts, refreshTransactions, state.accessToken, state.accounts, state.transferDraft])
 
+  const updateDepositDraft = useCallback((field, value) => {
+    dispatch({ type: 'deposit/updateDraft', field, value })
+  }, [])
+
+  const resetDepositDraft = useCallback(() => {
+    dispatch({ type: 'deposit/resetDraft' })
+  }, [])
+
+  const submitDeposit = useCallback(async () => {
+    if (!state.accessToken) {
+      dispatch({
+        type: 'deposit/submitFailure',
+        message: 'You need to sign in before creating a deposit.',
+      })
+      return null
+    }
+
+    const destinationAccount = state.accounts.find(
+      (account) => account.id === state.depositDraft.accountId,
+    )
+
+    if (!destinationAccount) {
+      dispatch({
+        type: 'deposit/submitFailure',
+        message: 'Choose a valid destination account.',
+      })
+      return null
+    }
+
+    if (!Number.isFinite(state.depositDraft.amount) || state.depositDraft.amount <= 0) {
+      dispatch({
+        type: 'deposit/submitFailure',
+        message: 'Enter a deposit amount greater than zero.',
+      })
+      return null
+    }
+
+    dispatch({ type: 'deposit/submitStart' })
+
+    try {
+      const checkout = await initiateDepositRequest(state.accessToken, {
+        accountId: destinationAccount.id,
+        amount: state.depositDraft.amount,
+      })
+
+      if (!checkout.checkoutUrl) {
+        throw new Error('Checkout URL was not returned by the server.')
+      }
+
+      window.location.assign(checkout.checkoutUrl)
+      return checkout
+    } catch (error) {
+      dispatch({
+        type: 'deposit/submitFailure',
+        message: error.message || 'Unable to create deposit checkout.',
+      })
+      return null
+    }
+  }, [state.accessToken, state.accounts, state.depositDraft])
+
   useEffect(() => {
     if (!state.isAuthenticated || !state.accessToken) {
       return
@@ -482,14 +592,17 @@ export function AppProvider({ children }) {
       login,
       logout,
       openTransferReview: () => dispatch({ type: 'transfer/openReview' }),
+      resetDepositDraft,
       resetTransferDraft: () => dispatch({ type: 'transfer/resetDraft' }),
       selectAccount: (accountId) => dispatch({ type: 'account/select', accountId }),
       state,
+      submitDeposit,
       submitTransfer,
+      updateDepositDraft,
       updateTransferDraft: (field, value) =>
         dispatch({ type: 'transfer/updateDraft', field, value }),
     }),
-    [login, logout, state, submitTransfer],
+    [login, logout, resetDepositDraft, state, submitDeposit, submitTransfer, updateDepositDraft],
   )
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>

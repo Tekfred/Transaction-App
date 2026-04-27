@@ -23,6 +23,12 @@ export const navigationItems = [
     path: '/transfers',
     description: 'Move money',
   },
+  {
+    id: 'deposits',
+    name: 'Deposits',
+    path: '/deposits',
+    description: 'Add funds',
+  },
 ]
 
 export const profileNavigation = {

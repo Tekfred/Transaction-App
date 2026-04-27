@@ -6,7 +6,7 @@ export async function initiateDeposit(accessToken, deposit) {
     accessToken,
     body: {
       account_id: deposit.accountId,
-      amount: deposit.amount,
+      amount: String(deposit.amount),
     },
     method: 'POST',
   })
