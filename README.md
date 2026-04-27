@@ -16,6 +16,18 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 npm install
 ```
 
+Create a local environment file from the example:
+
+```sh
+cp .env.example .env.local
+```
+
+The API base URL is configured with:
+
+```sh
+VITE_API_BASE_URL=http://127.0.0.1:8010
+```
+
 ### Compile and Hot-Reload for Development
 
 ```sh
