@@ -32,6 +32,7 @@ export function mapAccountsSummary(apiSummary) {
 export function mapTransaction(apiTransaction) {
   return {
     amount: Number(apiTransaction.amount),
+    currency: apiTransaction.currency ?? 'USD',
     createdAt: apiTransaction.created_at,
     id: apiTransaction.id,
     narration: apiTransaction.narration,

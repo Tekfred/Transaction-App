@@ -11,9 +11,10 @@ import {
   createSpendingOverview,
   quickActions,
 } from '../features/dashboard/data/summary.js'
+import { TransactionReceiptPanel } from '../features/transactions/components/index.js'
 
 export default function Dashboard() {
-  const { state } = useAppState()
+  const { downloadTransactionReceipt, state, viewTransactionReceipt } = useAppState()
   const balanceSummary = createBalanceSummary(state.accounts)
   const recentActivity = state.transactions.slice(0, 4)
   const spendingOverview = createSpendingOverview(
@@ -46,7 +47,28 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <RecentActivity transactions={recentActivity} />
+        <div className="grid gap-4">
+          <RecentActivity
+            canUseReceipts={!state.isUsingMockTransactions}
+            onDownloadReceipt={downloadTransactionReceipt}
+            onViewReceipt={viewTransactionReceipt}
+            transactions={recentActivity}
+          />
+          <TransactionReceiptPanel
+            error={state.receiptError}
+            isDownloading={state.isReceiptDownloading}
+            isLoading={state.isReceiptLoading}
+            onDownload={() =>
+              state.selectedReceipt
+                ? downloadTransactionReceipt(
+                    state.selectedReceipt.id,
+                    state.selectedReceipt.reference,
+                  )
+                : null
+            }
+            receipt={state.selectedReceipt}
+          />
+        </div>
         <SpendingOverview overview={spendingOverview} />
       </div>
     </PageSection>

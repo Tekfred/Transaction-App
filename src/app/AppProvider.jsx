@@ -10,7 +10,11 @@ import { toTransactionViewModels } from '../features/transactions/data/adapters.
 import { transferDraft as defaultTransferDraft } from '../features/transfers/data/transfers.js'
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../lib/api/auth.js'
 import { initiateDeposit as initiateDepositRequest } from '../lib/api/deposits.js'
-import { getTransactions as getTransactionsRequest } from '../lib/api/transactions.js'
+import {
+  getTransactionReceipt,
+  getTransactionReceiptPdf,
+  getTransactions as getTransactionsRequest,
+} from '../lib/api/transactions.js'
 import { createTransfer as createTransferRequest } from '../lib/api/transfers.js'
 import { clearStoredAuth, loadStoredAuth, storeAuth } from './authStorage.js'
 
@@ -31,13 +35,17 @@ const initialState = {
   isAuthLoading: true,
   isDepositSubmitting: false,
   isAuthenticated: false,
+  isReceiptDownloading: false,
+  isReceiptLoading: false,
   isTransactionsLoading: false,
   isTransferSubmitting: false,
   isUsingMockAccounts: true,
   isUsingMockTransactions: true,
   isTransferReviewOpen: false,
   refreshToken: null,
+  receiptError: null,
   selectedAccountId: mockAccounts[0]?.id ?? null,
+  selectedReceipt: null,
   transactions: mockTransactions,
   transactionsError: null,
   transferError: null,
@@ -168,6 +176,48 @@ function appReducer(state, action) {
         transactions: mockTransactions,
         transactionsError: action.message,
       }
+    case 'receipt/loadStart':
+      return {
+        ...state,
+        isReceiptLoading: true,
+        receiptError: null,
+      }
+    case 'receipt/loadSuccess':
+      return {
+        ...state,
+        isReceiptLoading: false,
+        receiptError: null,
+        selectedReceipt: action.receipt,
+      }
+    case 'receipt/loadFailure':
+      return {
+        ...state,
+        isReceiptLoading: false,
+        receiptError: action.message,
+      }
+    case 'receipt/downloadStart':
+      return {
+        ...state,
+        isReceiptDownloading: true,
+        receiptError: null,
+      }
+    case 'receipt/downloadSuccess':
+      return {
+        ...state,
+        isReceiptDownloading: false,
+      }
+    case 'receipt/downloadFailure':
+      return {
+        ...state,
+        isReceiptDownloading: false,
+        receiptError: action.message,
+      }
+    case 'receipt/clear':
+      return {
+        ...state,
+        receiptError: null,
+        selectedReceipt: null,
+      }
     case 'transfer/openReview':
       return {
         ...state,
@@ -256,13 +306,17 @@ function appReducer(state, action) {
         isAuthLoading: false,
         isDepositSubmitting: false,
         isAuthenticated: false,
+        isReceiptDownloading: false,
+        isReceiptLoading: false,
         isTransactionsLoading: false,
         isTransferReviewOpen: false,
         isTransferSubmitting: false,
         isUsingMockAccounts: true,
         isUsingMockTransactions: true,
         refreshToken: null,
+        receiptError: null,
         selectedAccountId: mockAccounts[0]?.id ?? null,
+        selectedReceipt: null,
         transactions: mockTransactions,
         transactionsError: null,
         transferError: null,
@@ -524,6 +578,68 @@ export function AppProvider({ children }) {
     }
   }, [state.accessToken, state.accounts, state.depositDraft])
 
+  const viewTransactionReceipt = useCallback(
+    async (transactionId) => {
+      if (!state.accessToken) {
+        dispatch({
+          type: 'receipt/loadFailure',
+          message: 'You need to sign in before viewing receipts.',
+        })
+        return null
+      }
+
+      dispatch({ type: 'receipt/loadStart' })
+
+      try {
+        const receipt = await getTransactionReceipt(state.accessToken, transactionId)
+        dispatch({ type: 'receipt/loadSuccess', receipt })
+        return receipt
+      } catch (error) {
+        dispatch({
+          type: 'receipt/loadFailure',
+          message: error.message || 'Unable to load receipt.',
+        })
+        return null
+      }
+    },
+    [state.accessToken],
+  )
+
+  const downloadTransactionReceipt = useCallback(
+    async (transactionId, reference) => {
+      if (!state.accessToken) {
+        dispatch({
+          type: 'receipt/downloadFailure',
+          message: 'You need to sign in before downloading receipts.',
+        })
+        return
+      }
+
+      dispatch({ type: 'receipt/downloadStart' })
+
+      try {
+        const blob = await getTransactionReceiptPdf(state.accessToken, transactionId)
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+
+        link.href = url
+        link.download = `receipt-${reference || transactionId}.pdf`
+        document.body.append(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+
+        dispatch({ type: 'receipt/downloadSuccess' })
+      } catch (error) {
+        dispatch({
+          type: 'receipt/downloadFailure',
+          message: error.message || 'Unable to download receipt.',
+        })
+      }
+    },
+    [state.accessToken],
+  )
+
   useEffect(() => {
     if (!state.isAuthenticated || !state.accessToken) {
       return
@@ -589,6 +705,8 @@ export function AppProvider({ children }) {
   const value = useMemo(
     () => ({
       closeTransferReview: () => dispatch({ type: 'transfer/closeReview' }),
+      clearReceipt: () => dispatch({ type: 'receipt/clear' }),
+      downloadTransactionReceipt,
       login,
       logout,
       openTransferReview: () => dispatch({ type: 'transfer/openReview' }),
@@ -601,8 +719,19 @@ export function AppProvider({ children }) {
       updateDepositDraft,
       updateTransferDraft: (field, value) =>
         dispatch({ type: 'transfer/updateDraft', field, value }),
+      viewTransactionReceipt,
     }),
-    [login, logout, resetDepositDraft, state, submitDeposit, submitTransfer, updateDepositDraft],
+    [
+      downloadTransactionReceipt,
+      login,
+      logout,
+      resetDepositDraft,
+      state,
+      submitDeposit,
+      submitTransfer,
+      updateDepositDraft,
+      viewTransactionReceipt,
+    ],
   )
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>
