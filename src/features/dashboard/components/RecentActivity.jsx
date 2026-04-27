@@ -10,6 +10,12 @@ export default function RecentActivity({ transactions }) {
       </div>
 
       <div className="divide-y divide-slate-900/8">
+        {transactions.length === 0 ? (
+          <p className="rounded-2xl bg-slate-50 p-4 text-sm font-semibold text-slate-500">
+            No recent activity yet.
+          </p>
+        ) : null}
+
         {transactions.map((transaction) => {
           const isCredit = transaction.amount > 0
 

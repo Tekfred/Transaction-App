@@ -4,9 +4,18 @@ import { transactions } from '../../transactions/data/transactions.js'
 
 export const primaryAccount = accounts[0]
 
-const monthlySpending = transactions
-  .filter((transaction) => transaction.amount < 0)
-  .reduce((total, transaction) => total + Math.abs(transaction.amount), 0)
+export function createSpendingOverview(transactions, currency = 'USD') {
+  const monthlySpending = transactions
+    .filter((transaction) => transaction.amount < 0)
+    .reduce((total, transaction) => total + Math.abs(transaction.amount), 0)
+
+  return {
+    amount: monthlySpending,
+    currency,
+    limit: 4000,
+    period: 'Recent activity',
+  }
+}
 
 const pendingPayments = payments.filter((payment) =>
   ['pending', 'scheduled'].includes(payment.status),
@@ -45,11 +54,6 @@ export const quickActions = [
   },
 ]
 
-export const spendingOverview = {
-  amount: monthlySpending,
-  currency: primaryAccount.currency,
-  period: 'Recent activity',
-  limit: 4000,
-}
+export const spendingOverview = createSpendingOverview(transactions, primaryAccount.currency)
 
 export const recentActivity = transactions.slice(0, 4)

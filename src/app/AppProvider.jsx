@@ -4,8 +4,11 @@ import { getAccounts as getAccountsRequest, getAccountsSummary } from '../lib/ap
 import { accounts as mockAccounts } from '../features/accounts/data/accounts.js'
 import { toAccountViewModels } from '../features/accounts/data/adapters.js'
 import { createAccountsSummary } from '../features/accounts/data/summary.js'
+import { transactions as mockTransactions } from '../features/transactions/data/transactions.js'
+import { toTransactionViewModels } from '../features/transactions/data/adapters.js'
 import { transferDraft as defaultTransferDraft } from '../features/transfers/data/transfers.js'
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../lib/api/auth.js'
+import { getTransactions as getTransactionsRequest } from '../lib/api/transactions.js'
 import { clearStoredAuth, loadStoredAuth, storeAuth } from './authStorage.js'
 
 const AppStateContext = createContext(null)
@@ -19,10 +22,14 @@ const initialState = {
   isAccountsLoading: false,
   isAuthLoading: true,
   isAuthenticated: false,
+  isTransactionsLoading: false,
   isUsingMockAccounts: true,
+  isUsingMockTransactions: true,
   isTransferReviewOpen: false,
   refreshToken: null,
   selectedAccountId: mockAccounts[0]?.id ?? null,
+  transactions: mockTransactions,
+  transactionsError: null,
   transferDraft: defaultTransferDraft,
   user: null,
 }
@@ -90,6 +97,28 @@ function appReducer(state, action) {
           [action.field]: action.value,
         },
       }
+    case 'transactions/loadStart':
+      return {
+        ...state,
+        isTransactionsLoading: true,
+        transactionsError: null,
+      }
+    case 'transactions/loadSuccess':
+      return {
+        ...state,
+        isTransactionsLoading: false,
+        isUsingMockTransactions: false,
+        transactions: action.transactions,
+        transactionsError: null,
+      }
+    case 'transactions/loadFailure':
+      return {
+        ...state,
+        isTransactionsLoading: false,
+        isUsingMockTransactions: true,
+        transactions: mockTransactions,
+        transactionsError: action.message,
+      }
     case 'transfer/openReview':
       return {
         ...state,
@@ -144,9 +173,13 @@ function appReducer(state, action) {
         isAccountsLoading: false,
         isAuthLoading: false,
         isAuthenticated: false,
+        isTransactionsLoading: false,
         isUsingMockAccounts: true,
+        isUsingMockTransactions: true,
         refreshToken: null,
         selectedAccountId: mockAccounts[0]?.id ?? null,
+        transactions: mockTransactions,
+        transactionsError: null,
         user: null,
       }
     default:
@@ -278,6 +311,42 @@ export function AppProvider({ children }) {
         dispatch({
           type: 'accounts/loadFailure',
           message: error.message || 'Unable to load accounts.',
+        })
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [state.accessToken, state.isAuthenticated])
+
+  useEffect(() => {
+    if (!state.isAuthenticated || !state.accessToken) {
+      return
+    }
+
+    let isActive = true
+
+    dispatch({ type: 'transactions/loadStart' })
+
+    getTransactionsRequest(state.accessToken)
+      .then((apiTransactions) => {
+        if (!isActive) {
+          return
+        }
+
+        dispatch({
+          type: 'transactions/loadSuccess',
+          transactions: toTransactionViewModels(apiTransactions),
+        })
+      })
+      .catch((error) => {
+        if (!isActive) {
+          return
+        }
+
+        dispatch({
+          type: 'transactions/loadFailure',
+          message: error.message || 'Unable to load transactions.',
         })
       })
 
