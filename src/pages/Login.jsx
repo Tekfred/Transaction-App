@@ -9,6 +9,7 @@ export default function Login() {
   const { login, state } = useAppState()
   const location = useLocation()
   const navigate = useNavigate()
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -52,7 +53,7 @@ export default function Login() {
           <label className="grid gap-2">
             <span className="text-sm font-semibold text-slate-700">Email</span>
             <FormControl
-              className="border-slate-900/10 bg-white text-slate-950 focus:border-[--color-primary] focus:ring-[--color-primary]/15"
+              className="border-slate-900/10 bg-white text-slate-950 caret-[var(--color-primary)] focus:border-[var(--color-primary)] focus:ring-[rgba(78,54,226,0.15)]"
               onChange={(event) =>
                 setForm((current) => ({ ...current, email: event.target.value }))
               }
@@ -65,16 +66,25 @@ export default function Login() {
 
           <label className="grid gap-2">
             <span className="text-sm font-semibold text-slate-700">Password</span>
-            <FormControl
-              className="border-slate-900/10 bg-white text-slate-950 focus:border-[--color-primary] focus:ring-[--color-primary]/15"
-              onChange={(event) =>
-                setForm((current) => ({ ...current, password: event.target.value }))
-              }
-              placeholder="secret123"
-              required
-              type="password"
-              value={form.password}
-            />
+            <div className="relative">
+              <FormControl
+                className="border-slate-900/10 bg-white pr-20 text-slate-950 caret-[var(--color-primary)] placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-[rgba(78,54,226,0.15)]"
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, password: event.target.value }))
+                }
+                placeholder="Enter your password"
+                required
+                type={isPasswordVisible ? 'text' : 'password'}
+                value={form.password}
+              />
+              <button
+                className="absolute right-2 top-1/2 min-h-8 -translate-y-1/2 rounded-lg px-3 text-xs font-bold text-[var(--color-primary)] transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                onClick={() => setIsPasswordVisible((current) => !current)}
+                type="button"
+              >
+                {isPasswordVisible ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </label>
 
           {state.authError ? (
@@ -83,9 +93,19 @@ export default function Login() {
             </p>
           ) : null}
 
-          <Button disabled={state.isAuthLoading} size="lg" type="submit">
-            {state.isAuthLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
+          <div className="grid gap-2 pt-2">
+            <Button
+              className="w-full border border-indigo-500/20 text-base"
+              disabled={state.isAuthLoading}
+              size="lg"
+              type="submit"
+            >
+              {state.isAuthLoading ? 'Logging in...' : 'Sign in to account'}
+            </Button>
+            <p className="text-center text-xs font-semibold text-slate-500">
+              Use your account email and password to continue.
+            </p>
+          </div>
         </form>
       </Card>
     </main>

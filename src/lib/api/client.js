@@ -52,12 +52,25 @@ export async function apiRequest(path, options = {}) {
     requestHeaders.set('Content-Type', 'application/json')
   }
 
-  const response = await fetch(buildUrl(path, query), {
-    ...fetchOptions,
-    body: body === undefined || body instanceof FormData ? body : JSON.stringify(body),
-    headers: requestHeaders,
-    method,
-  })
+  let response
+
+  try {
+    response = await fetch(buildUrl(path, query), {
+      ...fetchOptions,
+      body: body === undefined || body instanceof FormData ? body : JSON.stringify(body),
+      headers: requestHeaders,
+      method,
+    })
+  } catch (error) {
+    throw new ApiError(
+      `Unable to reach the API at ${API_BASE_URL}. Check that the backend is running and CORS allows this frontend.`,
+      {
+        data: error,
+        status: 0,
+        statusText: 'Network Error',
+      },
+    )
+  }
 
   const data = await parseResponse(response, responseType)
 
