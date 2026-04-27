@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
+import { useAppState } from '../app/AppProvider.jsx'
 import { navigationItems, profileNavigation } from '../app/navigation.js'
 import logo from '../assets/logo.svg'
 import profileImage from '../assets/profile_img_1.png'
@@ -15,8 +16,13 @@ const navLinkClass = ({ isActive }) =>
   )
 
 export default function Navbar({ title }) {
+  const { logout, state } = useAppState()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()
+  const profileName =
+    [state.user?.firstName, state.user?.lastName].filter(Boolean).join(' ') ||
+    profileNavigation.name
+  const profileRole = state.user?.email || profileNavigation.role
 
   useEffect(() => {
     setIsMenuOpen(false)
@@ -25,7 +31,7 @@ export default function Navbar({ title }) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-900/8 bg-white/85 backdrop-blur-xl">
       <div className="mx-auto w-[min(1100px,calc(100%-2rem))] py-3">
-        <div className="grid gap-3 rounded-[28px] border border-slate-900/8 bg-white/90 p-3 shadow-[0_18px_48px_rgba(31,53,88,0.08)] lg:grid-cols-[auto_1fr_auto] lg:items-center">
+        <div className="grid gap-3 rounded-[28px] border border-slate-900/8 bg-white/90 p-3 shadow-[0_18px_48px_rgba(31,53,88,0.08)] lg:grid-cols-[auto_1fr_auto_auto] lg:items-center">
           <div className="flex min-w-0 items-center justify-between gap-4">
             <NavLink
               aria-label="Dashboard"
@@ -118,12 +124,21 @@ export default function Navbar({ title }) {
               src={profileImage}
             />
             <span className="min-w-0">
-              <span className="block text-sm font-bold">{profileNavigation.name}</span>
-              <span className="block text-xs font-semibold opacity-70">
-                {profileNavigation.role}
-              </span>
+              <span className="block truncate text-sm font-bold">{profileName}</span>
+              <span className="block truncate text-xs font-semibold opacity-70">{profileRole}</span>
             </span>
           </NavLink>
+
+          <button
+            className={cn(
+              'rounded-2xl border border-slate-900/8 bg-slate-50 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[--color-primary]',
+              isMenuOpen ? 'block' : 'hidden lg:block',
+            )}
+            onClick={logout}
+            type="button"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </header>
