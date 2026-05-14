@@ -53,7 +53,7 @@ export default function Login() {
           <label className="grid gap-2">
             <span className="text-sm font-semibold text-slate-700">Email</span>
             <FormControl
-              className="border-slate-900/10 bg-white text-slate-950 caret-[var(--color-primary)] focus:border-[var(--color-primary)] focus:ring-[rgba(78,54,226,0.15)]"
+              className="border-slate-900/10 bg-white text-slate-950 caret-primary focus:border-primary focus:ring-[rgba(78,54,226,0.15)]"
               onChange={(event) =>
                 setForm((current) => ({ ...current, email: event.target.value }))
               }
@@ -68,7 +68,7 @@ export default function Login() {
             <span className="text-sm font-semibold text-slate-700">Password</span>
             <div className="relative">
               <FormControl
-                className="border-slate-900/10 bg-white pr-20 text-slate-950 caret-[var(--color-primary)] placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-[rgba(78,54,226,0.15)]"
+                className="border-slate-900/10 bg-white pr-20 text-slate-950 caret-primary placeholder:text-slate-400 focus:border-primary focus:ring-[rgba(78,54,226,0.15)]"
                 onChange={(event) =>
                   setForm((current) => ({ ...current, password: event.target.value }))
                 }
@@ -78,7 +78,7 @@ export default function Login() {
                 value={form.password}
               />
               <button
-                className="absolute right-2 top-1/2 min-h-8 -translate-y-1/2 rounded-lg px-3 text-xs font-bold text-[var(--color-primary)] transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                className="absolute right-2 top-1/2 min-h-8 -translate-y-1/2 rounded-lg px-3 text-xs font-bold text-primary transition hover:bg-slate-100  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 onClick={() => setIsPasswordVisible((current) => !current)}
                 type="button"
               >
