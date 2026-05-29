@@ -62,3 +62,51 @@ export function mapDepositCheckout(apiCheckout) {
     status: apiCheckout.status,
   }
 }
+
+export function mapBiller(apiBiller) {
+  return {
+    allowsVariableAmount: apiBiller.allows_variable_amount,
+    category: apiBiller.category,
+    categoryLabel: apiBiller.category_display,
+    code: apiBiller.code,
+    fixedAmount: apiBiller.fixed_amount === null ? null : Number(apiBiller.fixed_amount),
+    id: apiBiller.id,
+    name: apiBiller.name,
+    referenceLabel: apiBiller.reference_label,
+  }
+}
+
+export function mapBillInquiry(apiInquiry) {
+  return {
+    allowsVariableAmount: apiInquiry.allows_variable_amount,
+    amountDue: apiInquiry.amount_due === null ? null : Number(apiInquiry.amount_due),
+    billerId: apiInquiry.biller_id,
+    billerName: apiInquiry.biller_name,
+    customerName: apiInquiry.customer_name,
+    customerReference: apiInquiry.customer_reference,
+    referenceLabel: apiInquiry.reference_label,
+  }
+}
+
+export function mapBillPayment(apiPayment) {
+  return {
+    amount: Number(apiPayment.amount),
+    billerId: apiPayment.biller_id,
+    billerName: apiPayment.biller_name,
+    createdAt: apiPayment.created_at,
+    customerName: apiPayment.customer_name,
+    customerReference: apiPayment.customer_reference,
+    failureReason: apiPayment.failure_reason,
+    id: apiPayment.id,
+    narration: apiPayment.narration,
+    processedAt: apiPayment.processed_at,
+    providerReference: apiPayment.provider_reference,
+    reference: apiPayment.reference,
+    sourceAccountId: apiPayment.source_account_id,
+    sourceAccountNumber: apiPayment.source_account_number,
+    status: apiPayment.status,
+    transaction: apiPayment.transaction ? mapTransaction(apiPayment.transaction) : null,
+    transactionId: apiPayment.transaction_id,
+    transactionReference: apiPayment.transaction_reference,
+  }
+}

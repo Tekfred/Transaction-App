@@ -1,10 +1,14 @@
 export function toTransactionViewModel(transaction) {
   const isDeposit = transaction.transactionType === 'deposit'
+  const isBillPayment = transaction.transactionType === 'bill_payment'
   const isTransfer = transaction.transactionType === 'transfer'
 
   return {
     accountId: transaction.receiverAccountId ?? transaction.senderAccountId,
-    amount: isTransfer && transaction.senderAccountId ? -transaction.amount : transaction.amount,
+    amount:
+      (isTransfer || isBillPayment) && transaction.senderAccountId
+        ? -transaction.amount
+        : transaction.amount,
     category: transaction.transactionTypeLabel ?? transaction.transactionType ?? 'Transaction',
     currency: transaction.currency ?? 'USD',
     date: transaction.processedAt ?? transaction.createdAt,
@@ -12,7 +16,13 @@ export function toTransactionViewModel(transaction) {
     merchant:
       transaction.narration ||
       transaction.sourceLabel ||
-      (isDeposit ? 'Deposit' : isTransfer ? 'Transfer' : 'Transaction'),
+      (isDeposit
+        ? 'Deposit'
+        : isBillPayment
+          ? 'Bill Payment'
+          : isTransfer
+            ? 'Transfer'
+            : 'Transaction'),
     reference: transaction.reference,
     status: transaction.status,
   }

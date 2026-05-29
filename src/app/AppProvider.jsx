@@ -9,6 +9,14 @@ import { transactions as mockTransactions } from '../features/transactions/data/
 import { toTransactionViewModels } from '../features/transactions/data/adapters.js'
 import { transferDraft as defaultTransferDraft } from '../features/transfers/data/transfers.js'
 import {
+  createBillPayment as createBillPaymentRequest,
+  getBillers as getBillersRequest,
+  getBillPaymentReceipt as getBillPaymentReceiptRequest,
+  getBillPayments as getBillPaymentsRequest,
+  inquireBill as inquireBillRequest,
+  payBill as payBillRequest,
+} from '../lib/api/billPayments.js'
+import {
   getCurrentUser,
   login as loginRequest,
   logout as logoutRequest,
@@ -26,12 +34,31 @@ import { AUTH_STORAGE_KEY, clearStoredAuth, loadStoredAuth, storeAuth } from './
 const AppStateContext = createContext(null)
 const storedInitialAuth = loadStoredAuth()
 
+const defaultBillPaymentDraft = {
+  amount: '',
+  billerId: '',
+  customerReference: '',
+  narration: '',
+  sourceAccountId: mockAccounts[0]?.id ?? '',
+}
+
+function isBillPaymentSourceAccount(account) {
+  return ['checking', 'savings'].includes(String(account.type ?? '').toLowerCase())
+}
+
 const initialState = {
   accessToken: storedInitialAuth?.accessToken ?? null,
   accounts: mockAccounts,
   accountsError: null,
   accountsSummary: createAccountsSummary(mockAccounts),
   authError: null,
+  billers: [],
+  billersError: null,
+  billPaymentDraft: defaultBillPaymentDraft,
+  billPaymentError: null,
+  billPaymentInquiry: null,
+  billPaymentReceipt: null,
+  billPayments: [],
   depositDraft: {
     ...defaultDepositDraft,
     accountId: mockAccounts[0]?.id ?? null,
@@ -39,6 +66,10 @@ const initialState = {
   depositError: null,
   isAccountsLoading: false,
   isAuthLoading: !storedInitialAuth?.accessToken,
+  isBillersLoading: false,
+  isBillPaymentHistoryLoading: false,
+  isBillPaymentInquiryLoading: false,
+  isBillPaymentSubmitting: false,
   isDepositSubmitting: false,
   isAuthenticated: Boolean(storedInitialAuth?.accessToken),
   isReceiptDownloading: false,
@@ -67,6 +98,32 @@ function appReducer(state, action) {
         ...state,
         selectedAccountId: action.accountId,
       }
+    case 'billers/loadStart':
+      return {
+        ...state,
+        billersError: null,
+        isBillersLoading: true,
+      }
+    case 'billers/loadSuccess':
+      return {
+        ...state,
+        billers: action.billers,
+        billersError: null,
+        billPaymentDraft: {
+          ...state.billPaymentDraft,
+          billerId: action.billers.some((biller) => biller.id === state.billPaymentDraft.billerId)
+            ? state.billPaymentDraft.billerId
+            : action.billers[0]?.id || '',
+        },
+        isBillersLoading: false,
+      }
+    case 'billers/loadFailure':
+      return {
+        ...state,
+        billers: [],
+        billersError: action.message,
+        isBillersLoading: false,
+      }
     case 'accounts/loadStart':
       return {
         ...state,
@@ -84,6 +141,14 @@ function appReducer(state, action) {
       const nextFromAccountId = draftFromExists
         ? state.transferDraft.fromAccountId
         : fallbackFromAccountId
+      const billPaymentSourceAccount =
+        action.accounts.find(
+          (account) =>
+            account.id === state.billPaymentDraft.sourceAccountId &&
+            isBillPaymentSourceAccount(account),
+        ) ??
+        action.accounts.find(isBillPaymentSourceAccount) ??
+        action.accounts[0]
 
       return {
         ...state,
@@ -98,6 +163,10 @@ function appReducer(state, action) {
         transferDraft: {
           ...state.transferDraft,
           fromAccountId: nextFromAccountId,
+        },
+        billPaymentDraft: {
+          ...state.billPaymentDraft,
+          sourceAccountId: billPaymentSourceAccount?.id ?? fallbackFromAccountId,
         },
         depositDraft: {
           ...state.depositDraft,
@@ -115,6 +184,17 @@ function appReducer(state, action) {
         accountsSummary: createAccountsSummary(mockAccounts),
         isAccountsLoading: false,
         isUsingMockAccounts: true,
+        billPaymentDraft: {
+          ...state.billPaymentDraft,
+          sourceAccountId:
+            mockAccounts.find(
+              (account) =>
+                account.id === state.billPaymentDraft.sourceAccountId &&
+                isBillPaymentSourceAccount(account),
+            )?.id ??
+            mockAccounts.find(isBillPaymentSourceAccount)?.id ??
+            mockAccounts[0]?.id,
+        },
         selectedAccountId: mockAccounts[0]?.id ?? null,
       }
     case 'transfer/updateDraft':
@@ -134,6 +214,99 @@ function appReducer(state, action) {
           [action.field]: action.value,
         },
         depositError: null,
+      }
+    case 'billPayment/updateDraft': {
+      const shouldClearInquiry = ['billerId', 'customerReference'].includes(action.field)
+
+      return {
+        ...state,
+        billPaymentDraft: {
+          ...state.billPaymentDraft,
+          [action.field]: action.value,
+        },
+        billPaymentError: null,
+        billPaymentInquiry: shouldClearInquiry ? null : state.billPaymentInquiry,
+        billPaymentReceipt: shouldClearInquiry ? null : state.billPaymentReceipt,
+      }
+    }
+    case 'billPayment/inquiryStart':
+      return {
+        ...state,
+        billPaymentError: null,
+        billPaymentInquiry: null,
+        billPaymentReceipt: null,
+        isBillPaymentInquiryLoading: true,
+      }
+    case 'billPayment/inquirySuccess':
+      return {
+        ...state,
+        billPaymentDraft: {
+          ...state.billPaymentDraft,
+          amount: action.inquiry.amountDue ?? state.billPaymentDraft.amount,
+          narration: `${action.inquiry.billerName} bill`,
+        },
+        billPaymentError: null,
+        billPaymentInquiry: action.inquiry,
+        isBillPaymentInquiryLoading: false,
+      }
+    case 'billPayment/inquiryFailure':
+      return {
+        ...state,
+        billPaymentError: action.message,
+        billPaymentInquiry: null,
+        isBillPaymentInquiryLoading: false,
+      }
+    case 'billPayments/loadStart':
+      return {
+        ...state,
+        isBillPaymentHistoryLoading: true,
+      }
+    case 'billPayments/loadSuccess':
+      return {
+        ...state,
+        billPayments: action.billPayments,
+        isBillPaymentHistoryLoading: false,
+      }
+    case 'billPayments/loadFailure':
+      return {
+        ...state,
+        billPaymentError: action.message,
+        isBillPaymentHistoryLoading: false,
+      }
+    case 'billPayment/submitStart':
+      return {
+        ...state,
+        billPaymentError: null,
+        billPaymentReceipt: null,
+        isBillPaymentSubmitting: true,
+      }
+    case 'billPayment/submitSuccess':
+      return {
+        ...state,
+        billPaymentError: null,
+        billPaymentReceipt: action.receipt,
+        isBillPaymentSubmitting: false,
+      }
+    case 'billPayment/submitFailure':
+      return {
+        ...state,
+        billPaymentError: action.message,
+        isBillPaymentSubmitting: false,
+      }
+    case 'billPayment/reset':
+      return {
+        ...state,
+        billPaymentDraft: {
+          ...defaultBillPaymentDraft,
+          billerId: state.billers[0]?.id || '',
+          sourceAccountId:
+            state.accounts.find(isBillPaymentSourceAccount)?.id ??
+            state.accounts[0]?.id ??
+            defaultBillPaymentDraft.sourceAccountId,
+        },
+        billPaymentError: null,
+        billPaymentInquiry: null,
+        billPaymentReceipt: null,
       }
     case 'deposit/resetDraft':
       return {
@@ -308,6 +481,15 @@ function appReducer(state, action) {
         accountsError: null,
         accountsSummary: createAccountsSummary(mockAccounts),
         authError: null,
+        billers: [],
+        billersError: null,
+        billPaymentDraft: {
+          ...defaultBillPaymentDraft,
+        },
+        billPaymentError: null,
+        billPaymentInquiry: null,
+        billPaymentReceipt: null,
+        billPayments: [],
         depositDraft: {
           ...defaultDepositDraft,
           accountId: mockAccounts[0]?.id ?? null,
@@ -315,6 +497,10 @@ function appReducer(state, action) {
         depositError: null,
         isAccountsLoading: false,
         isAuthLoading: false,
+        isBillersLoading: false,
+        isBillPaymentHistoryLoading: false,
+        isBillPaymentInquiryLoading: false,
+        isBillPaymentSubmitting: false,
         isDepositSubmitting: false,
         isAuthenticated: false,
         isReceiptDownloading: false,
@@ -507,6 +693,7 @@ export function AppProvider({ children }) {
           storeAuth({
             accessToken,
             refreshToken: state.refreshToken,
+            user: state.user,
           })
           dispatch({ type: 'auth/tokenRefreshSuccess', accessToken })
 
@@ -552,6 +739,28 @@ export function AppProvider({ children }) {
     })
 
     return transactions
+  }, [])
+
+  const refreshBillers = useCallback(async (accessToken) => {
+    const billers = await getBillersRequest(accessToken)
+
+    dispatch({
+      type: 'billers/loadSuccess',
+      billers,
+    })
+
+    return billers
+  }, [])
+
+  const refreshBillPayments = useCallback(async (accessToken) => {
+    const billPayments = await getBillPaymentsRequest(accessToken)
+
+    dispatch({
+      type: 'billPayments/loadSuccess',
+      billPayments,
+    })
+
+    return billPayments
   }, [])
 
   const submitTransfer = useCallback(async () => {
@@ -636,6 +845,187 @@ export function AppProvider({ children }) {
     state.accessToken,
     state.accounts,
     state.transferDraft,
+  ])
+
+  const updateBillPaymentDraft = useCallback((field, value) => {
+    dispatch({ type: 'billPayment/updateDraft', field, value })
+  }, [])
+
+  const resetBillPayment = useCallback(() => {
+    dispatch({ type: 'billPayment/reset' })
+  }, [])
+
+  const inquireBillPayment = useCallback(async () => {
+    if (!state.accessToken) {
+      dispatch({
+        type: 'billPayment/inquiryFailure',
+        message: 'You need to sign in before checking a bill.',
+      })
+      return null
+    }
+
+    if (!state.billPaymentDraft.billerId) {
+      dispatch({
+        type: 'billPayment/inquiryFailure',
+        message: 'Choose a biller before checking the bill.',
+      })
+      return null
+    }
+
+    const customerReference = String(state.billPaymentDraft.customerReference ?? '').trim()
+
+    if (!customerReference) {
+      dispatch({
+        type: 'billPayment/inquiryFailure',
+        message: 'Enter the bill reference before checking the bill.',
+      })
+      return null
+    }
+
+    dispatch({ type: 'billPayment/inquiryStart' })
+
+    try {
+      const inquiry = await runAuthorizedRequest((accessToken) =>
+        inquireBillRequest(accessToken, {
+          billerId: state.billPaymentDraft.billerId,
+          customerReference,
+        }),
+      )
+
+      dispatch({ type: 'billPayment/inquirySuccess', inquiry })
+      return inquiry
+    } catch (error) {
+      dispatch({
+        type: 'billPayment/inquiryFailure',
+        message: error.message || 'Unable to check this bill.',
+      })
+      return null
+    }
+  }, [
+    runAuthorizedRequest,
+    state.accessToken,
+    state.billPaymentDraft.billerId,
+    state.billPaymentDraft.customerReference,
+  ])
+
+  const submitBillPayment = useCallback(async () => {
+    if (!state.accessToken) {
+      dispatch({
+        type: 'billPayment/submitFailure',
+        message: 'You need to sign in before making a payment.',
+      })
+      return null
+    }
+
+    if (!state.billPaymentInquiry) {
+      dispatch({
+        type: 'billPayment/submitFailure',
+        message: 'Check the bill before confirming payment.',
+      })
+      return null
+    }
+
+    const sourceAccount = state.accounts.find(
+      (account) => account.id === state.billPaymentDraft.sourceAccountId,
+    )
+    const amount = Number(state.billPaymentDraft.amount)
+
+    if (!sourceAccount) {
+      dispatch({
+        type: 'billPayment/submitFailure',
+        message: 'Choose a valid source account.',
+      })
+      return null
+    }
+
+    if (!['checking', 'savings'].includes(String(sourceAccount.type ?? '').toLowerCase())) {
+      dispatch({
+        type: 'billPayment/submitFailure',
+        message: 'Bills can only be paid from checking or savings accounts.',
+      })
+      return null
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      dispatch({
+        type: 'billPayment/submitFailure',
+        message: 'Enter a payment amount greater than zero.',
+      })
+      return null
+    }
+
+    if (
+      state.billPaymentInquiry.amountDue !== null &&
+      amount !== state.billPaymentInquiry.amountDue
+    ) {
+      dispatch({
+        type: 'billPayment/submitFailure',
+        message: 'This biller requires the fixed amount returned from inquiry.',
+      })
+      return null
+    }
+
+    dispatch({ type: 'billPayment/submitStart' })
+
+    try {
+      const pendingPayment = await runAuthorizedRequest((accessToken) =>
+        createBillPaymentRequest(accessToken, {
+          amount,
+          billerId: state.billPaymentInquiry.billerId,
+          customerName: state.billPaymentInquiry.customerName,
+          customerReference: state.billPaymentInquiry.customerReference,
+          narration:
+            state.billPaymentDraft.narration || `${state.billPaymentInquiry.billerName} bill`,
+          sourceAccountId: sourceAccount.id,
+        }),
+      )
+      const transaction = await runAuthorizedRequest((accessToken) =>
+        payBillRequest(accessToken, pendingPayment.id),
+      )
+      let receipt
+
+      try {
+        receipt = await runAuthorizedRequest((accessToken) =>
+          getBillPaymentReceiptRequest(accessToken, pendingPayment.id),
+        )
+      } catch {
+        receipt = {
+          ...pendingPayment,
+          processedAt: transaction.processedAt,
+          status: transaction.status,
+          transaction,
+          transactionId: transaction.id,
+          transactionReference: transaction.reference,
+        }
+      }
+
+      dispatch({ type: 'billPayment/submitSuccess', receipt })
+
+      Promise.all([
+        runAuthorizedRequest(refreshAccounts),
+        runAuthorizedRequest(refreshBillPayments),
+        runAuthorizedRequest(refreshTransactions),
+      ]).catch(() => {
+        // The receipt remains valid even if follow-up refreshes fail.
+      })
+
+      return receipt
+    } catch (error) {
+      dispatch({
+        type: 'billPayment/submitFailure',
+        message: error.message || 'Unable to complete bill payment.',
+      })
+      return null
+    }
+  }, [
+    refreshAccounts,
+    refreshBillPayments,
+    refreshTransactions,
+    runAuthorizedRequest,
+    state.accessToken,
+    state.accounts,
+    state.billPaymentDraft,
+    state.billPaymentInquiry,
   ])
 
   const updateDepositDraft = useCallback((field, value) => {
@@ -828,20 +1218,86 @@ export function AppProvider({ children }) {
     }
   }, [refreshTransactions, runAuthorizedRequest, state.accessToken, state.isAuthenticated])
 
+  useEffect(() => {
+    if (!state.isAuthenticated || !state.accessToken) {
+      return
+    }
+
+    let isActive = true
+
+    dispatch({ type: 'billers/loadStart' })
+
+    runAuthorizedRequest(refreshBillers)
+      .then(() => {
+        if (!isActive) {
+          return
+        }
+      })
+      .catch((error) => {
+        if (!isActive) {
+          return
+        }
+
+        dispatch({
+          type: 'billers/loadFailure',
+          message: error.message || 'Unable to load billers.',
+        })
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [refreshBillers, runAuthorizedRequest, state.accessToken, state.isAuthenticated])
+
+  useEffect(() => {
+    if (!state.isAuthenticated || !state.accessToken) {
+      return
+    }
+
+    let isActive = true
+
+    dispatch({ type: 'billPayments/loadStart' })
+
+    runAuthorizedRequest(refreshBillPayments)
+      .then(() => {
+        if (!isActive) {
+          return
+        }
+      })
+      .catch((error) => {
+        if (!isActive) {
+          return
+        }
+
+        dispatch({
+          type: 'billPayments/loadFailure',
+          message: error.message || 'Unable to load bill payments.',
+        })
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [refreshBillPayments, runAuthorizedRequest, state.accessToken, state.isAuthenticated])
+
   const value = useMemo(
     () => ({
       closeTransferReview: () => dispatch({ type: 'transfer/closeReview' }),
       clearReceipt: () => dispatch({ type: 'receipt/clear' }),
       downloadTransactionReceipt,
+      inquireBillPayment,
       login,
       logout,
       openTransferReview: () => dispatch({ type: 'transfer/openReview' }),
+      resetBillPayment,
       resetDepositDraft,
       resetTransferDraft: () => dispatch({ type: 'transfer/resetDraft' }),
       selectAccount: (accountId) => dispatch({ type: 'account/select', accountId }),
       state,
+      submitBillPayment,
       submitDeposit,
       submitTransfer,
+      updateBillPaymentDraft,
       updateDepositDraft,
       updateTransferDraft: (field, value) =>
         dispatch({ type: 'transfer/updateDraft', field, value }),
@@ -849,12 +1305,16 @@ export function AppProvider({ children }) {
     }),
     [
       downloadTransactionReceipt,
+      inquireBillPayment,
       login,
       logout,
+      resetBillPayment,
       resetDepositDraft,
       state,
+      submitBillPayment,
       submitDeposit,
       submitTransfer,
+      updateBillPaymentDraft,
       updateDepositDraft,
       viewTransactionReceipt,
     ],

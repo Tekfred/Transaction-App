@@ -1,0 +1,2 @@
+export const lightFormControlClass =
+  'h-12 cursor-text border-slate-300 bg-white text-[16px] text-slate-950 caret-[#4e36e2] shadow-[inset_0_1px_0_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus:border-[#4e36e2] focus:bg-white focus:ring-[rgba(78,54,226,0.18)] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-700 [-webkit-text-fill-color:#0f172a]'

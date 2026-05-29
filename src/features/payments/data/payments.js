@@ -8,6 +8,7 @@ export const payments = [
     status: 'scheduled',
     category: 'Utilities',
     sourceAccountId: 'checking-main',
+    receiverAccountNumber: '',
     autopay: true,
   },
   {
@@ -19,6 +20,7 @@ export const payments = [
     status: 'scheduled',
     category: 'Utilities',
     sourceAccountId: 'checking-main',
+    receiverAccountNumber: '',
     autopay: true,
   },
   {
@@ -30,6 +32,7 @@ export const payments = [
     status: 'pending',
     category: 'Credit',
     sourceAccountId: 'checking-main',
+    receiverAccountNumber: '',
     autopay: false,
   },
 ]
