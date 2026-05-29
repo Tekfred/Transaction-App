@@ -15,7 +15,16 @@ export default function TransferFormShell({
   receipt,
 }) {
   const selectedFromAccount = accounts.find((account) => account.id === draft.fromAccountId)
-  const selectedToAccount = accounts.find((account) => account.id === draft.toAccountId)
+  const receiverAccountNumber = String(draft.receiverAccountNumber ?? '').trim()
+  const isSameSenderAccount =
+    Boolean(receiverAccountNumber) && selectedFromAccount?.accountNumber === receiverAccountNumber
+  const canReview = Boolean(
+    selectedFromAccount &&
+    receiverAccountNumber &&
+    !isSameSenderAccount &&
+    Number.isFinite(draft.amount) &&
+    draft.amount > 0,
+  )
 
   return (
     <Card className="grid gap-5 bg-slate-950 text-white">
@@ -34,7 +43,7 @@ export default function TransferFormShell({
           >
             {accounts.map((account) => (
               <option key={account.id} value={account.id}>
-                {account.name}
+                {account.name} · {account.accountNumber}
               </option>
             ))}
           </FormControl>
@@ -42,16 +51,20 @@ export default function TransferFormShell({
         <label className="grid gap-2 rounded-2xl bg-white/10 p-4">
           <span className="text-xs font-bold uppercase tracking-widest text-slate-300">To</span>
           <FormControl
-            as="select"
-            onChange={(event) => onUpdateDraft('toAccountId', event.target.value)}
-            value={draft.toAccountId}
-          >
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.name}
-              </option>
-            ))}
-          </FormControl>
+            inputMode="numeric"
+            onChange={(event) => onUpdateDraft('receiverAccountNumber', event.target.value)}
+            placeholder="Enter receiver account number"
+            type="text"
+            value={draft.receiverAccountNumber}
+          />
+          <span className="text-xs font-semibold text-slate-400">
+            Send to any active account by entering the recipient account number.
+          </span>
+          {isSameSenderAccount ? (
+            <span className="text-xs font-bold text-rose-200">
+              Enter a different receiver account number.
+            </span>
+          ) : null}
         </label>
         <label className="grid gap-2 rounded-2xl bg-white/10 p-4">
           <span className="text-xs font-bold uppercase tracking-widest text-slate-300">Amount</span>
@@ -95,12 +108,12 @@ export default function TransferFormShell({
           </p>
           <p className="font-semibold">
             {formatCurrency(draft.amount, draft.currency)} from {selectedFromAccount?.name} to{' '}
-            {selectedToAccount?.name}
+            account {receiverAccountNumber}
           </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
             <Button
               className="w-full"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !canReview}
               onClick={onSubmit}
               variant="secondary"
             >
@@ -136,7 +149,7 @@ export default function TransferFormShell({
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
         <Button
           className="w-full"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !canReview}
           onClick={onOpenReview}
           variant="secondary"
         >

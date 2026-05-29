@@ -79,11 +79,10 @@ function appReducer(state, action) {
       const draftFromExists = action.accounts.some(
         (account) => account.id === state.transferDraft.fromAccountId,
       )
-      const draftToExists = action.accounts.some(
-        (account) => account.id === state.transferDraft.toAccountId,
-      )
       const fallbackFromAccountId = action.accounts[0]?.id || null
-      const fallbackToAccountId = action.accounts[1]?.id || action.accounts[0]?.id || null
+      const nextFromAccountId = draftFromExists
+        ? state.transferDraft.fromAccountId
+        : fallbackFromAccountId
 
       return {
         ...state,
@@ -97,10 +96,7 @@ function appReducer(state, action) {
           : action.accounts[0]?.id || null,
         transferDraft: {
           ...state.transferDraft,
-          fromAccountId: draftFromExists
-            ? state.transferDraft.fromAccountId
-            : fallbackFromAccountId,
-          toAccountId: draftToExists ? state.transferDraft.toAccountId : fallbackToAccountId,
+          fromAccountId: nextFromAccountId,
         },
         depositDraft: {
           ...state.depositDraft,
@@ -240,8 +236,7 @@ function appReducer(state, action) {
         transferDraft: {
           ...defaultTransferDraft,
           fromAccountId: state.accounts[0]?.id ?? defaultTransferDraft.fromAccountId,
-          toAccountId:
-            state.accounts[1]?.id ?? state.accounts[0]?.id ?? defaultTransferDraft.toAccountId,
+          receiverAccountNumber: '',
         },
         transferError: null,
         transferReceipt: null,
@@ -330,6 +325,11 @@ function appReducer(state, action) {
         transactions: mockTransactions,
         transactionsError: null,
         transferError: null,
+        transferDraft: {
+          ...defaultTransferDraft,
+          fromAccountId: mockAccounts[0]?.id ?? defaultTransferDraft.fromAccountId,
+          receiverAccountNumber: '',
+        },
         user: null,
         transferReceipt: null,
       }
@@ -524,19 +524,25 @@ export function AppProvider({ children }) {
     const senderAccount = state.accounts.find(
       (account) => account.id === state.transferDraft.fromAccountId,
     )
-    const receiverAccount = state.accounts.find(
-      (account) => account.id === state.transferDraft.toAccountId,
-    )
+    const receiverAccountNumber = String(state.transferDraft.receiverAccountNumber ?? '').trim()
 
-    if (!senderAccount || !receiverAccount) {
+    if (!senderAccount) {
       dispatch({
         type: 'transfer/submitFailure',
-        message: 'Choose valid sender and receiver accounts.',
+        message: 'Choose a valid sender account.',
       })
       return null
     }
 
-    if (senderAccount.id === receiverAccount.id) {
+    if (!receiverAccountNumber) {
+      dispatch({
+        type: 'transfer/submitFailure',
+        message: 'Enter the receiver account number.',
+      })
+      return null
+    }
+
+    if (senderAccount.accountNumber === receiverAccountNumber) {
       dispatch({
         type: 'transfer/submitFailure',
         message: 'Sender and receiver accounts must be different.',
@@ -559,7 +565,7 @@ export function AppProvider({ children }) {
         createTransferRequest(accessToken, {
           amount: state.transferDraft.amount,
           narration: state.transferDraft.memo || 'Transfer',
-          receiverAccountNumber: receiverAccount.accountNumber,
+          receiverAccountNumber,
           senderAccountId: senderAccount.id,
         }),
       )

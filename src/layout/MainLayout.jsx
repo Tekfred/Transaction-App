@@ -11,7 +11,7 @@ export default function MainLayout() {
       >
         Skip to content
       </a>
-      <Navbar title="Transaction App" />
+      <Navbar title="NEXORA" />
       <main id="main-content" className="mx-auto w-[min(1100px,calc(100%-2rem))] py-6">
         <Outlet />
       </main>

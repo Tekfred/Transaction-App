@@ -39,14 +39,11 @@ export default function Navbar({ title }) {
               to="/"
             >
               <img
-                alt="Transaction App logo"
+                alt="NEXORA Finance Workspace logo"
                 className="h-12 w-12 rounded-2xl bg-white p-2 shadow-[0_12px_28px_rgba(32,54,86,0.08)]"
                 src={logo}
               />
               <div className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
-                  Finance Workspace
-                </p>
                 <h1 className="truncate text-xl font-bold text-slate-950">{title}</h1>
               </div>
             </NavLink>

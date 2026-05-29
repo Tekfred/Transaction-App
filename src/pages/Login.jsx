@@ -37,13 +37,13 @@ export default function Login() {
       <Card className="w-full max-w-md" padded="lg">
         <div className="mb-6 flex items-center gap-3">
           <img
-            alt="Transaction App logo"
-            className="h-12 w-12 rounded-2xl bg-white p-2 shadow-[0_12px_28px_rgba(32,54,86,0.08)]"
+            alt="NEXORA Finance Workspace logo"
+            className="h-14 w-14 rounded-2xl bg-white shadow-[0_14px_30px_rgba(32,54,86,0.12)]"
             src={logo}
           />
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
-              Finance Workspace
+              NEXORA Finance Workspace
             </p>
             <h1 className="text-2xl font-bold text-slate-950">Sign in</h1>
           </div>
@@ -53,7 +53,9 @@ export default function Login() {
           <label className="grid gap-2">
             <span className="text-sm font-semibold text-slate-700">Email</span>
             <FormControl
-              className="border-slate-900/10 bg-white text-slate-950 caret-primary focus:border-primary focus:ring-[rgba(78,54,226,0.15)]"
+              autoComplete="email"
+              className="h-12 cursor-text border-slate-300 bg-white text-[16px] text-slate-950 caret-[#4e36e2] shadow-[inset_0_1px_0_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus:border-[#4e36e2] focus:bg-white focus:ring-[rgba(78,54,226,0.18)]"
+              name="email"
               onChange={(event) =>
                 setForm((current) => ({ ...current, email: event.target.value }))
               }
@@ -68,7 +70,9 @@ export default function Login() {
             <span className="text-sm font-semibold text-slate-700">Password</span>
             <div className="relative">
               <FormControl
-                className="border-slate-900/10 bg-white pr-20 text-slate-950 caret-primary placeholder:text-slate-400 focus:border-primary focus:ring-[rgba(78,54,226,0.15)]"
+                autoComplete="current-password"
+                className="h-12 cursor-text border-slate-300 bg-white pr-24 text-[16px] text-slate-950 caret-[#4e36e2] shadow-[inset_0_1px_0_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus:border-[#4e36e2] focus:bg-white focus:ring-[rgba(78,54,226,0.18)]"
+                name="password"
                 onChange={(event) =>
                   setForm((current) => ({ ...current, password: event.target.value }))
                 }
@@ -78,7 +82,7 @@ export default function Login() {
                 value={form.password}
               />
               <button
-                className="absolute right-2 top-1/2 min-h-8 -translate-y-1/2 rounded-lg px-3 text-xs font-bold text-primary transition hover:bg-slate-100  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="absolute right-2 top-1/2 min-h-8 -translate-y-1/2 rounded-lg px-3 text-xs font-bold text-[#4e36e2] transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4e36e2]"
                 onClick={() => setIsPasswordVisible((current) => !current)}
                 type="button"
               >
