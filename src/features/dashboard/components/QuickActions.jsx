@@ -1,6 +1,27 @@
 import { Button, Card } from '../../../components/ui/index.js'
+import { useNavigate } from 'react-router-dom'
 
 export default function QuickActions({ actions }) {
+  const navigate = useNavigate()
+
+  const handleActionClick = (actionId) => {
+    let path = '/'
+    switch (actionId) {
+      case 'transfer':
+        path = '/transfers'
+        break
+      case 'deposit':
+        path = '/deposits'
+        break
+      case 'pay-bill':
+        path = '/payments'
+        break
+      default:
+        path = '/'
+    }
+    navigate(path, { replace: false })
+  }
+
   return (
     <Card className="grid gap-4">
       <div>
@@ -13,6 +34,7 @@ export default function QuickActions({ actions }) {
           <Button
             className="h-auto justify-between rounded-2xl px-4 py-3 text-left"
             key={action.id}
+            onClick={() => handleActionClick(action.id)}
             variant={action.id === 'transfer' ? 'primary' : 'secondary'}
           >
             <span>

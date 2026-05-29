@@ -15,8 +15,17 @@ export default function BalanceSummary({ summary }) {
           <p className="text-xs font-bold uppercase tracking-widest text-slate-300">
             Primary account
           </p>
-          <p className="mt-1 font-semibold text-white">{summary.accountName}</p>
-          <p className="text-sm text-slate-300">ending {summary.accountNumber}</p>
+          <p className="mt-1 font-semibold text-white">
+            {String(summary.accountName).trim() !== ''
+              ? String(summary.accountName).trim()
+              : 'No account'}
+          </p>
+          <p className="text-sm text-slate-300">
+            ending{' '}
+            {String(summary.accountNumber).trim() !== ''
+              ? String(summary.accountNumber).trim()
+              : '----'}
+          </p>
         </div>
       </div>
 

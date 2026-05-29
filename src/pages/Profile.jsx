@@ -18,7 +18,7 @@ export default function Profile() {
         <div>
           <p className="text-slate-500">Account holder</p>
           <strong className="block text-2xl font-semibold text-slate-900">Cony</strong>
-          <span className="text-slate-500">Personal banking workspace</span>
+          <span className="text-slate-500">NEXORA Finance Workspace</span>
         </div>
       </Card>
     </PageSection>

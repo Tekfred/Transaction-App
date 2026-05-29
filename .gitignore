@@ -27,7 +27,7 @@ coverage
 *.tsbuildinfo
 .codex
 .eslintcache
-.env.example
+.env
 
 # Cypress
 /cypress/videos/

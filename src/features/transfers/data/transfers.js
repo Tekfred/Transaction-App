@@ -2,7 +2,7 @@ export const transfers = [
   {
     id: 'transfer-001',
     fromAccountId: 'checking-main',
-    toAccountId: 'savings-emergency',
+    receiverAccountNumber: '9174',
     title: 'Internal Transfer',
     amount: 500,
     currency: 'USD',
@@ -15,7 +15,7 @@ export const transfers = [
 
 export const transferDraft = {
   fromAccountId: 'checking-main',
-  toAccountId: 'savings-emergency',
+  receiverAccountNumber: '',
   amount: 250,
   currency: 'USD',
   memo: 'Savings goal',
