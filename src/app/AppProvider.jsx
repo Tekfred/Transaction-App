@@ -21,12 +21,13 @@ import {
   getTransactions as getTransactionsRequest,
 } from '../lib/api/transactions.js'
 import { createTransfer as createTransferRequest } from '../lib/api/transfers.js'
-import { clearStoredAuth, loadStoredAuth, storeAuth } from './authStorage.js'
+import { AUTH_STORAGE_KEY, clearStoredAuth, loadStoredAuth, storeAuth } from './authStorage.js'
 
 const AppStateContext = createContext(null)
+const storedInitialAuth = loadStoredAuth()
 
 const initialState = {
-  accessToken: null,
+  accessToken: storedInitialAuth?.accessToken ?? null,
   accounts: mockAccounts,
   accountsError: null,
   accountsSummary: createAccountsSummary(mockAccounts),
@@ -37,9 +38,9 @@ const initialState = {
   },
   depositError: null,
   isAccountsLoading: false,
-  isAuthLoading: true,
+  isAuthLoading: !storedInitialAuth?.accessToken,
   isDepositSubmitting: false,
-  isAuthenticated: false,
+  isAuthenticated: Boolean(storedInitialAuth?.accessToken),
   isReceiptDownloading: false,
   isReceiptLoading: false,
   isTransactionsLoading: false,
@@ -47,7 +48,7 @@ const initialState = {
   isUsingMockAccounts: true,
   isUsingMockTransactions: true,
   isTransferReviewOpen: false,
-  refreshToken: null,
+  refreshToken: storedInitialAuth?.refreshToken ?? null,
   receiptError: null,
   selectedAccountId: mockAccounts[0]?.id ?? null,
   selectedReceipt: null,
@@ -56,7 +57,7 @@ const initialState = {
   transferError: null,
   transferDraft: defaultTransferDraft,
   transferReceipt: null,
-  user: null,
+  user: storedInitialAuth?.user ?? null,
 }
 
 function appReducer(state, action) {
@@ -263,6 +264,11 @@ function appReducer(state, action) {
         transferError: action.message,
       }
     case 'auth/restoreStart':
+      return {
+        ...state,
+        authError: null,
+        isAuthLoading: !state.accessToken,
+      }
     case 'auth/loginStart':
       return {
         ...state,
@@ -369,6 +375,7 @@ export function AppProvider({ children }) {
           storeAuth({
             accessToken,
             refreshToken: storedAuth.refreshToken,
+            user: storedAuth.user ?? null,
           })
           user = await getCurrentUser(accessToken)
         }
@@ -379,6 +386,12 @@ export function AppProvider({ children }) {
 
         dispatch({
           type: 'auth/success',
+          accessToken,
+          refreshToken: storedAuth.refreshToken,
+          user,
+        })
+
+        storeAuth({
           accessToken,
           refreshToken: storedAuth.refreshToken,
           user,
@@ -400,6 +413,34 @@ export function AppProvider({ children }) {
     }
   }, [])
 
+  useEffect(() => {
+    function syncStoredSession(event) {
+      if (event.key !== AUTH_STORAGE_KEY) {
+        return
+      }
+
+      const storedAuth = loadStoredAuth()
+
+      if (!storedAuth?.accessToken) {
+        dispatch({ type: 'auth/logout' })
+        return
+      }
+
+      dispatch({
+        type: 'auth/success',
+        accessToken: storedAuth.accessToken,
+        refreshToken: storedAuth.refreshToken,
+        user: storedAuth.user ?? null,
+      })
+    }
+
+    window.addEventListener('storage', syncStoredSession)
+
+    return () => {
+      window.removeEventListener('storage', syncStoredSession)
+    }
+  }, [])
+
   const login = useCallback(async (credentials) => {
     dispatch({ type: 'auth/loginStart' })
 
@@ -409,6 +450,7 @@ export function AppProvider({ children }) {
       storeAuth({
         accessToken: auth.accessToken,
         refreshToken: auth.refreshToken,
+        user: auth.user,
       })
 
       dispatch({

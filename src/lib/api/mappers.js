@@ -19,6 +19,7 @@ export function mapAccount(apiAccount) {
     createdAt: apiAccount.created_at,
     id: apiAccount.id ?? apiAccount.account_id,
     isActive: apiAccount.is_active,
+    routingNumber: '', // Add routingNumber as empty string since we don't have it from API
   }
 }
 
