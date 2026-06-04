@@ -32,6 +32,9 @@ export default function Login() {
     }
   }
 
+  const loginInputClass =
+    '!border-slate-300 !bg-white !text-slate-950 h-12 cursor-text text-[16px] caret-[#4e36e2] shadow-[inset_0_1px_0_rgba(15,23,42,0.03)] placeholder:!text-slate-400 focus:!border-[#4e36e2] focus:!bg-white focus:ring-[rgba(78,54,226,0.18)] [-webkit-text-fill-color:#0f172a]'
+
   return (
     <main className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top,rgba(78,54,226,0.14),transparent_32%),linear-gradient(180deg,#f7f9fc_0%,#eef3f9_100%)] px-4 py-8">
       <Card className="w-full max-w-md" padded="lg">
@@ -54,7 +57,7 @@ export default function Login() {
             <span className="text-sm font-semibold text-slate-700">Email</span>
             <FormControl
               autoComplete="email"
-              className="h-12 cursor-text border-slate-300 bg-white text-[16px] text-slate-950 caret-[#4e36e2] shadow-[inset_0_1px_0_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus:border-[#4e36e2] focus:bg-white focus:ring-[rgba(78,54,226,0.18)]"
+              className={loginInputClass}
               name="email"
               onChange={(event) =>
                 setForm((current) => ({ ...current, email: event.target.value }))
@@ -71,7 +74,7 @@ export default function Login() {
             <div className="relative">
               <FormControl
                 autoComplete="current-password"
-                className="h-12 cursor-text border-slate-300 bg-white pr-24 text-[16px] text-slate-950 caret-[#4e36e2] shadow-[inset_0_1px_0_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus:border-[#4e36e2] focus:bg-white focus:ring-[rgba(78,54,226,0.18)]"
+                className={`${loginInputClass} pr-24`}
                 name="password"
                 onChange={(event) =>
                   setForm((current) => ({ ...current, password: event.target.value }))
