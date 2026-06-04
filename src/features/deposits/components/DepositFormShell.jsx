@@ -72,16 +72,21 @@ export default function DepositFormShell({
         </p>
       ) : null}
 
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+      <div className="flex flex-col gap-2 sm:flex-row xl:flex-col">
         <Button
-          className="w-full"
+          className="w-full sm:w-fit xl:w-full"
           disabled={isSubmitting || isDisabled}
           onClick={onSubmit}
           variant="secondary"
         >
           {isSubmitting ? 'Creating checkout...' : 'Continue to Checkout'}
         </Button>
-        <Button className="w-full" disabled={isSubmitting} onClick={onReset} variant="secondary">
+        <Button
+          className="w-full sm:w-fit xl:w-full"
+          disabled={isSubmitting}
+          onClick={onReset}
+          variant="secondary"
+        >
           Reset Deposit
         </Button>
       </div>

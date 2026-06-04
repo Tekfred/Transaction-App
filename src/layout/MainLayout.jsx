@@ -12,7 +12,10 @@ export default function MainLayout() {
         Skip to content
       </a>
       <Navbar title="NEXORA" />
-      <main id="main-content" className="mx-auto w-[min(1100px,calc(100%-2rem))] py-6">
+      <main
+        id="main-content"
+        className="mx-auto w-[min(1180px,calc(100%-2rem))] py-4 sm:py-6 xl:py-8"
+      >
         <Outlet />
       </main>
     </div>

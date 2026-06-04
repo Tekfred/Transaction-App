@@ -1,4 +1,4 @@
-const AUTH_STORAGE_KEY = 'transaction_app_auth'
+export const AUTH_STORAGE_KEY = 'transaction_app_auth'
 
 export function loadStoredAuth() {
   try {

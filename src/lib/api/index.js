@@ -1,5 +1,6 @@
 export * from './accounts.js'
 export * from './auth.js'
+export * from './billPayments.js'
 export * from './client.js'
 export * from './config.js'
 export * from './deposits.js'

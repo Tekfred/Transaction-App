@@ -30,7 +30,7 @@ export default function Navbar({ title }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-900/8 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto w-[min(1100px,calc(100%-2rem))] py-3">
+      <div className="mx-auto w-[min(1180px,calc(100%-2rem))] py-3">
         <div className="grid gap-3 rounded-[28px] border border-slate-900/8 bg-white/90 p-3 shadow-[0_18px_48px_rgba(31,53,88,0.08)] lg:grid-cols-[auto_1fr_auto_auto] lg:items-center">
           <div className="flex min-w-0 items-center justify-between gap-4">
             <NavLink

@@ -110,9 +110,9 @@ export default function TransferFormShell({
             {formatCurrency(draft.amount, draft.currency)} from {selectedFromAccount?.name} to{' '}
             account {receiverAccountNumber}
           </p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="flex flex-col gap-2 sm:flex-row xl:flex-col">
             <Button
-              className="w-full"
+              className="w-full sm:w-fit xl:w-full"
               disabled={isSubmitting || !canReview}
               onClick={onSubmit}
               variant="secondary"
@@ -120,7 +120,7 @@ export default function TransferFormShell({
               {isSubmitting ? 'Sending...' : 'Confirm Transfer'}
             </Button>
             <Button
-              className="w-full"
+              className="w-full sm:w-fit xl:w-full"
               disabled={isSubmitting}
               onClick={onCloseReview}
               variant="secondary"
@@ -146,16 +146,21 @@ export default function TransferFormShell({
         </div>
       ) : null}
 
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+      <div className="flex flex-col gap-2 sm:flex-row xl:flex-col">
         <Button
-          className="w-full"
+          className="w-full sm:w-fit xl:w-full"
           disabled={isSubmitting || !canReview}
           onClick={onOpenReview}
           variant="secondary"
         >
           Review Transfer
         </Button>
-        <Button className="w-full" disabled={isSubmitting} onClick={onReset} variant="secondary">
+        <Button
+          className="w-full sm:w-fit xl:w-full"
+          disabled={isSubmitting}
+          onClick={onReset}
+          variant="secondary"
+        >
           Reset Draft
         </Button>
       </div>
