@@ -48,12 +48,12 @@ export default function Dashboard() {
         </Card>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <BalanceSummary summary={balanceSummary} />
         <QuickActions actions={quickActions} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid gap-4">
           <RecentActivity
             canUseReceipts={!state.isUsingMockTransactions}

@@ -7,7 +7,7 @@ export default function BillInquiryForm({ biller, draft, isLoading, onSubmit, on
   return (
     <Card className="grid gap-4" padded="md">
       <div>
-        <p className="text-sm font-semibold text-slate-500">Step 2</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Step 2</p>
         <h3 className="text-xl font-semibold text-slate-900">Check bill</h3>
       </div>
 
@@ -24,7 +24,11 @@ export default function BillInquiryForm({ biller, draft, isLoading, onSubmit, on
         />
       </label>
 
-      <Button disabled={!biller || isLoading || !draft.customerReference.trim()} onClick={onSubmit}>
+      <Button
+        className="w-full sm:w-fit"
+        disabled={!biller || isLoading || !draft.customerReference.trim()}
+        onClick={onSubmit}
+      >
         {isLoading ? 'Checking...' : 'Check Bill'}
       </Button>
     </Card>

@@ -28,7 +28,7 @@ export default function Transfers() {
         </Card>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <div className="grid items-start gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
         <TransferFormShell
           accounts={state.accounts}
           draft={state.transferDraft}

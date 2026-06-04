@@ -39,19 +39,15 @@ export default function Payments() {
         </Card>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <div className="grid items-start gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid gap-4">
-          <BillerPicker
-            billers={state.billers}
-            isLoading={state.isBillersLoading}
-            onSelectBiller={(billerId) => updateBillPaymentDraft('billerId', billerId)}
-            selectedBillerId={state.billPaymentDraft.billerId}
-          />
-          <BillPaymentReceipt receipt={state.billPaymentReceipt} />
-        </div>
-
-        <div className="grid gap-4">
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid items-start gap-4 xl:grid-cols-3">
+            <BillerPicker
+              billers={state.billers}
+              isLoading={state.isBillersLoading}
+              onSelectBiller={(billerId) => updateBillPaymentDraft('billerId', billerId)}
+              selectedBillerId={state.billPaymentDraft.billerId}
+            />
             <BillInquiryForm
               biller={selectedBiller}
               draft={state.billPaymentDraft}
@@ -74,6 +70,19 @@ export default function Payments() {
             billPayments={state.billPayments}
             isLoading={state.isBillPaymentHistoryLoading}
           />
+        </div>
+
+        <div className="grid h-fit gap-4">
+          <BillPaymentReceipt receipt={state.billPaymentReceipt} />
+          <Card className="bg-slate-950 text-white" padded="md">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-300">Flow</p>
+            <div className="mt-4 grid gap-3 text-sm font-semibold text-slate-200">
+              <p>1. Choose biller</p>
+              <p>2. Enter reference</p>
+              <p>3. Check bill</p>
+              <p>4. Confirm and pay</p>
+            </div>
+          </Card>
         </div>
       </div>
     </PageSection>

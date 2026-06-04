@@ -14,9 +14,10 @@ export default function BillPaymentConfirmCard({
 }) {
   if (!inquiry) {
     return (
-      <Card className="grid gap-3" padded="md">
-        <p className="text-sm font-semibold text-slate-500">Step 3</p>
-        <p className="text-slate-600">Check a bill to review customer and amount details.</p>
+      <Card className="grid gap-2 bg-slate-50" padded="md">
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Step 3</p>
+        <h3 className="text-xl font-semibold text-slate-900">Confirm payment</h3>
+        <p className="text-sm text-slate-600">Bill details appear here after inquiry.</p>
       </Card>
     )
   }
@@ -29,7 +30,7 @@ export default function BillPaymentConfirmCard({
   return (
     <Card className="grid gap-4" padded="md">
       <div>
-        <p className="text-sm font-semibold text-slate-500">Step 3</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Step 3</p>
         <h3 className="text-xl font-semibold text-slate-900">Confirm payment</h3>
       </div>
 
@@ -80,11 +81,16 @@ export default function BillPaymentConfirmCard({
         />
       </label>
 
-      <div className="grid gap-2 sm:grid-cols-2">
-        <Button disabled={!canPay || isSubmitting} onClick={onPay}>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button className="w-full sm:w-fit" disabled={!canPay || isSubmitting} onClick={onPay}>
           {isSubmitting ? 'Processing...' : 'Pay Bill'}
         </Button>
-        <Button disabled={isSubmitting} onClick={onReset} variant="secondary">
+        <Button
+          className="w-full sm:w-fit"
+          disabled={isSubmitting}
+          onClick={onReset}
+          variant="secondary"
+        >
           Reset
         </Button>
       </div>
