@@ -37,7 +37,7 @@ export default function DepositSuccess() {
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <Link
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-primary)] px-5 py-3 text-sm font-bold text-white shadow-[0_16px_34px_rgba(78,54,226,0.28)] transition hover:bg-[var(--color-primary-strong)]"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-bold text-white shadow-[0_16px_34px_rgba(78,54,226,0.28)] transition hover:bg-primary-strong"
             to="/"
           >
             View Dashboard
