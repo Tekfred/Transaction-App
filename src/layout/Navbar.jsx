@@ -35,7 +35,7 @@ export default function Navbar({ title }) {
           <div className="flex min-w-0 items-center justify-between gap-4">
             <NavLink
               aria-label="Dashboard"
-              className="flex min-w-0 items-center gap-3 rounded-2xl pr-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[--color-primary]"
+              className="flex min-w-0 items-center gap-3 rounded-2xl pr-2 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[--color-primary]"
               to="/"
             >
               <img
@@ -52,7 +52,7 @@ export default function Navbar({ title }) {
               aria-controls="primary-navigation"
               aria-expanded={isMenuOpen}
               aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-900/8 bg-slate-50 text-slate-950 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[--color-primary] lg:hidden"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-900/8 bg-slate-50 text-slate-950 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[--color-primary] lg:hidden"
               onClick={() => setIsMenuOpen((current) => !current)}
               type="button"
             >
@@ -106,7 +106,7 @@ export default function Navbar({ title }) {
             aria-label="Profile"
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-2xl border border-slate-900/8 px-3 py-2 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[--color-primary]',
+                'flex items-center gap-3 rounded-2xl border border-slate-900/8 px-3 py-2 transition duration-200 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[--color-primary]',
                 isMenuOpen ? 'flex' : 'hidden lg:flex',
                 isActive
                   ? 'bg-slate-950 text-white'
@@ -128,7 +128,7 @@ export default function Navbar({ title }) {
 
           <button
             className={cn(
-              'rounded-2xl border border-slate-900/8 bg-slate-50 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[--color-primary]',
+              'rounded-2xl border border-slate-900/8 bg-slate-50 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[--color-primary]',
               isMenuOpen ? 'block' : 'hidden lg:block',
             )}
             onClick={logout}
