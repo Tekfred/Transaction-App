@@ -8,17 +8,7 @@ import logo from '../assets/logo.svg'
 import profileImage from '../assets/profile_img_1.png'
 import { cn } from '../utils/cn.js'
 
-/**
- * Navbar — New Header UI + Original Auth Wiring
- *
- * Auth logic 100% untouched from the original Navbar.jsx:
- *   - useAppState() → { logout, state }
- *   - state.user?.firstName / lastName / email
- *   - navigationItems + profileNavigation from navigation.js
- *   - NavLink active state detection (replaces currentTab/setCurrentTab)
- *   - logout() called on logout button click
- *   - isMenuOpen closes on route change via useLocation effect
- */
+
 export default function Navbar({ title }) {
   const { logout, state } = useAppState()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
