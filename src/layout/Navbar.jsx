@@ -41,7 +41,7 @@ export default function Navbar({ title }) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center py-4  border-slate-200/40 px-4 md:px-10">
-      <div className="flex justify-between items-center w-full max-w-7xl mx-auto ">
+      <div className="flex justify-between items-center w-full mx-auto ">
         {/* ── Logo ──────────────────────────────────────────── */}
         <NavLink
           to="/"
@@ -86,7 +86,7 @@ export default function Navbar({ title }) {
         {/* ── Right section: profile + logout ───────────────── */}
         <div className="flex items-center gap-4 md:gap-6">
           {/* Avatar + name */}
-          <div className="flex items-center gap-3" data-profile-popover>
+          <div className="flex items-center gap-3 backdrop-blur-lg rounded" data-profile-popover>
             <button
               type="button"
               onClick={() => setShowProfileEdit((c) => !c)}
