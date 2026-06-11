@@ -656,7 +656,7 @@ export default function Login() {
                     <svg className="absolute inset-0 w-full h-full -rotate-90">
                       <circle
                         cx="56" cy="56" r="52"
-                        className="stroke-[#4648d4] fill-none stroke-[4]"
+                        className="stroke-[#4648d4] fill-none stroke-4"
                         strokeDasharray="327"
                         strokeDashoffset={327 - (327 * biometricProgress) / 100}
                       />
