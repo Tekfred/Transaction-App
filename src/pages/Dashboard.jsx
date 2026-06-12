@@ -13,8 +13,16 @@ import {
 } from '../features/dashboard/data/summary.js'
 import { TransactionReceiptPanel } from '../features/transactions/components/index.js'
 
+/**
+ * Dashboard
+ *
+ * All state/logic wiring is 100% identical to the original.
+ * Only the layout shell and component implementations have changed
+ * (new UI inside each component file).
+ */
 export default function Dashboard() {
   const { downloadTransactionReceipt, state, viewTransactionReceipt } = useAppState()
+
   const balanceSummary = createBalanceSummary(state.accounts)
   const recentActivity = state.transactions.slice(0, 4)
   const spendingOverview = createSpendingOverview(
@@ -34,6 +42,7 @@ export default function Dashboard() {
         title="Dashboard"
       />
 
+      {/* Loading banner — preserved from original */}
       {state.isAccountsLoading || state.isTransactionsLoading ? (
         <Card className="bg-blue-50 text-blue-800" padded="md">
           <p className="font-semibold">Refreshing dashboard data</p>
@@ -41,6 +50,7 @@ export default function Dashboard() {
         </Card>
       ) : null}
 
+      {/* Error banner — preserved from original */}
       {state.transactionsError ? (
         <Card className="bg-amber-50 text-amber-800" padded="md">
           <p className="font-semibold">Using sample transaction activity</p>
@@ -48,11 +58,13 @@ export default function Dashboard() {
         </Card>
       ) : null}
 
+      {/* Row 1: Balance (left) + Quick Actions (right) */}
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <BalanceSummary summary={balanceSummary} />
         <QuickActions actions={quickActions} />
       </div>
 
+      {/* Row 2: Activity + Receipt (left) + Spending (right) */}
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid gap-4">
           <RecentActivity
