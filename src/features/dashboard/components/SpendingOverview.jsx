@@ -13,7 +13,7 @@ export default function SpendingOverview({ overview }) {
   const isNearLimit = progress >= 80
 
   return (
-    <div className="bg-white border border-slate-200/50 p-6 rounded-[32px] shadow-xs space-y-5 text-left">
+    <div className="bg-white border border-slate-200/50 p-6 rounded-4xl shadow-xs space-y-5 text-left">
       {/* Header */}
       <div>
         <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#565e74] block mb-1">

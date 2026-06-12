@@ -12,10 +12,10 @@ import { formatCurrency } from '../../../utils/formatters.js'
  */
 export default function BalanceSummary({ summary }) {
   return (
-    <div className="bg-white border border-slate-200/50 p-6 md:p-8 rounded-[32px] space-y-6 text-left shadow-xs relative overflow-hidden">
+    <div className="bg-white border border-slate-200/50 p-6 md:p-8 rounded-4xl space-y-6 text-left shadow-xs relative overflow-hidden">
       {/* Decorative glow */}
       <div
-        className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#4648d4]/10 to-transparent rounded-full blur-3xl pointer-events-none"
+        className="absolute top-0 right-0 w-64 h-64 bg-linear-to-br from-[#4648d4]/10 to-transparent rounded-full blur-3xl pointer-events-none"
         aria-hidden="true"
       />
 

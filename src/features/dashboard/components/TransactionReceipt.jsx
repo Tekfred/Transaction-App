@@ -33,7 +33,7 @@ export default function TransactionReceiptPanel({
   // Empty / loading state
   if (isLoading) {
     return (
-      <div className="bg-white border border-slate-200/50 p-6 rounded-[32px] shadow-xs flex flex-col items-center justify-center gap-3 py-12 text-center">
+      <div className="bg-white border border-slate-200/50 p-6 rounded-4xl shadow-xs flex flex-col items-center justify-center gap-3 py-12 text-center">
         <RefreshCw size={20} className="animate-spin text-[#4648d4]" />
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
           Loading receipt…
@@ -44,11 +44,11 @@ export default function TransactionReceiptPanel({
 
   if (error && !receipt) {
     return (
-      <div className="bg-rose-50 border border-rose-200/60 p-6 rounded-[32px] flex flex-col items-center justify-center gap-3 py-10 text-center">
+      <div className="bg-rose-50 border border-rose-200/60 p-6 rounded-4xl flex flex-col items-center justify-center gap-3 py-10 text-center">
         <AlertCircle size={20} className="text-rose-400" />
         <div>
           <p className="text-sm font-bold text-rose-700">Receipt unavailable</p>
-          <p className="text-[11px] text-rose-500 mt-1 max-w-[220px] mx-auto">{error}</p>
+          <p className="text-[11px] text-rose-500 mt-1 max-w-55 mx-auto">{error}</p>
         </div>
       </div>
     )
@@ -56,13 +56,13 @@ export default function TransactionReceiptPanel({
 
   if (!receipt) {
     return (
-      <div className="bg-white border border-slate-200/50 p-6 rounded-[32px] shadow-xs flex flex-col items-center justify-center gap-3 py-12 text-center">
+      <div className="bg-white border border-slate-200/50 p-6 rounded-4xl shadow-xs flex flex-col items-center justify-center gap-3 py-12 text-center">
         <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
           <ReceiptText size={20} />
         </div>
         <div>
           <h4 className="text-sm font-bold text-slate-700">No transaction selected</h4>
-          <p className="text-[11px] text-slate-400 mt-1 max-w-[200px] mx-auto">
+          <p className="text-[11px] text-slate-400 mt-1 max-w-50 mx-auto">
             Click "View Receipt" on any transaction above to see its full audit details here.
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function TransactionReceiptPanel({
   const isDebit = receipt.amount < 0
 
   return (
-    <div className="bg-white border border-slate-200/60 p-6 rounded-[32px] relative shadow-xs text-left divide-y divide-slate-100 animate-fade-in">
+    <div className="bg-white border border-slate-200/60 p-6 rounded-4xl relative shadow-xs text-left divide-y divide-slate-100 animate-fade-in">
       {/* Header */}
       <div className="pb-4 flex justify-between items-center">
         <div className="flex items-center gap-2 text-[#4648d4] font-bold text-xs uppercase tracking-widest">
@@ -148,7 +148,7 @@ export default function TransactionReceiptPanel({
           type="button"
           onClick={onDownload}
           disabled={isDownloading}
-          className="w-full bg-[#0b1c30] hover:bg-[#4648d4] text-white py-3 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4648d4]"
+          className="w-full bg-[#0b1c30] hover:bg-[#4648d4] text-white py-3 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed focus-visible:outline  focus-visible:outline-[#4648d4]"
         >
           {isDownloading ? (
             <>

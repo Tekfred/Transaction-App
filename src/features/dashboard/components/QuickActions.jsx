@@ -38,7 +38,7 @@ export default function QuickActions({ actions }) {
   }
 
   return (
-    <div className="bg-white border border-slate-200/50 p-6 rounded-[32px] shadow-xs space-y-5 text-left">
+    <div className="bg-white border border-slate-200/50 p-6 rounded-4xl shadow-xs space-y-5 text-left">
       <div>
         <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#565e74] block mb-1">
           Quick Actions
@@ -60,7 +60,7 @@ export default function QuickActions({ actions }) {
                 group flex items-center justify-between gap-3 w-full
                 px-4 py-3.5 rounded-2xl text-left
                 transition-all active:scale-[0.98]
-                focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4648d4]
+                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4648d4]
                 ${
                   isPrimary
                     ? 'bg-[#0b1c30] hover:bg-[#4648d4] text-white shadow-md'

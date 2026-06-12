@@ -18,7 +18,7 @@ export default function RecentActivity({
   transactions,
 }) {
   return (
-    <div className="bg-white border border-slate-200/50 p-6 rounded-[32px] shadow-xs space-y-5 text-left">
+    <div className="bg-white border border-slate-200/50 p-6 rounded-4xl shadow-xs space-y-5 text-left">
       {/* Header */}
       <div>
         <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#565e74] block mb-1">
@@ -89,7 +89,7 @@ export default function RecentActivity({
                   <button
                     type="button"
                     onClick={() => onViewReceipt?.(transaction.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f8f9ff] hover:bg-[#eff4ff] text-[#4648d4] text-[11px] font-bold border border-slate-100 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4648d4]"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f8f9ff] hover:bg-[#eff4ff] text-[#4648d4] text-[11px] font-bold border border-slate-100 transition-all  focus-visible:outline-2 focus-visible:outline-[#4648d4]"
                   >
                     <FileText size={12} />
                     View Receipt
@@ -97,7 +97,7 @@ export default function RecentActivity({
                   <button
                     type="button"
                     onClick={() => onDownloadReceipt?.(transaction.id, transaction.reference)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f8f9ff] hover:bg-[#eff4ff] text-[#565e74] text-[11px] font-bold border border-slate-100 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4648d4]"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f8f9ff] hover:bg-[#eff4ff] text-[#565e74] text-[11px] font-bold border border-slate-100 transition-all  focus-visible:outline-2 focus-visible:outline-[#4648d4]"
                   >
                     <Download size={12} />
                     PDF
