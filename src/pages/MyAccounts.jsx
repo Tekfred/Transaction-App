@@ -31,7 +31,7 @@ export default function MyAccounts() {
         </Card>
       ) : null}
 
-      <div className="grid items-start gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+      <div className="grid items-start gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
         <AccountsSummary summary={state.accountsSummary} />
         <AccountList
           accounts={state.accounts}

@@ -39,9 +39,9 @@ export default function Payments() {
         </Card>
       ) : null}
 
-      <div className="grid items-start gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid gap-4">
-          <div className="grid items-start gap-4 xl:grid-cols-3">
+      <div className="grid items-start gap-6 2xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-6">
+          <div className="grid items-start gap-6 xl:grid-cols-3">
             <BillerPicker
               billers={state.billers}
               isLoading={state.isBillersLoading}
@@ -72,7 +72,7 @@ export default function Payments() {
           />
         </div>
 
-        <div className="grid h-fit gap-4">
+        <div className="grid h-fit gap-6">
           <BillPaymentReceipt receipt={state.billPaymentReceipt} />
           <Card className="bg-slate-950 text-white" padded="md">
             <p className="text-xs font-bold uppercase tracking-widest text-slate-300">Flow</p>

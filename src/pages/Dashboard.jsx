@@ -59,14 +59,14 @@ export default function Dashboard() {
       ) : null}
 
       {/* Row 1: Balance (left) + Quick Actions (right) */}
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <BalanceSummary summary={balanceSummary} />
         <QuickActions actions={quickActions} />
       </div>
 
       {/* Row 2: Activity + Receipt (left) + Spending (right) */}
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="grid gap-4">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-6">
           <RecentActivity
             canUseReceipts={!state.isUsingMockTransactions}
             onDownloadReceipt={downloadTransactionReceipt}
